@@ -81,19 +81,6 @@ public class Enemy {
                 ", script=" + scriptValues + '}';
     }
     
-    private static class RecordParser {
-        
-        private final CSVRecord rec;
-        
-        public RecordParser(CSVRecord record) {
-            rec = record;
-        }
-        
-        public int get(int i) {
-            return Integer.parseInt(rec.get(i));
-        }
-        
-    }
 
     public int getLevel() {
         return level;
