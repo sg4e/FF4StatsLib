@@ -37,21 +37,139 @@ import sg4e.ff4stats.RecordParser;
  * @author sg4e
  */
 public enum LevelData {
-    DARK_KNIGHT_CECIL("Dark Knight Cecil", 200, 0, "party/DarkKnightCecil.csv"),
-    KAIN("Kain", 190, 0, "party/Kain.csv"),
-    RYDIA("Rydia", 30, 15, "party/Rydia.csv"),
-    TELLAH("Tellah", 340, 90, "party/Tellah.csv"),
-    EDWARD("Edward", 60, 0, "party/Edward.csv"),
-    ROSA("Rosa", 150, 80, "party/Rosa.csv"),
-    YANG("Yang", 300, 0, "party/Yang.csv"),
-    POROM("Porom", 100, 50, "party/Porom.csv"),
-    PALOM("Palom", 110, 50, "party/Palom.csv"),
-    PALADIN_CECIL("Paladin Cecil", 600, 10, "party/PaladinCecil.csv"),
-    CID("Cid", 788, 0, "party/Cid.csv"),
-    EDGE("Edge", 790, 60, "party/Edge.csv"),
-    FUSOYA("FuSoYa", 1900, 190, "party/FuSoYa.csv");
+    DARK_KNIGHT_CECIL("Dark Knight Cecil", 200, 0, "party/DarkKnightCecil.csv", new GrowthTable(
+            new Stats(0,   0,  -1,   0,   0),
+            new Stats(-1,  0,  -1,  -1,   0),
+            new Stats(0,  -1,  -1,  -1,   0),
+            new Stats(1,   1,   1,   1,   0),
+            new Stats(1,   1,   1,   1,   0),
+            new Stats(1,   1,   1,   0,   0),
+            new Stats(2,   2,   2,   0,   0),
+            new Stats(3,   0,   0,   0,   0)
+    )),
+    KAIN("Kain", 190, 0, "party/Kain.csv", new GrowthTable(
+            new Stats(-1,  -1,  -1,  -1,  -1),
+            new Stats(0,  -1,   0,   0,  -1),
+            new Stats(1,   1,   1,   0,   0),
+            new Stats(1,   0,   1,   0,   1),
+            new Stats(1,   0,   1,   1,   0),
+            new Stats(2,   0,   2,   2,   2),
+            new Stats(0,   2,   2,   0,   0),
+            new Stats(3,   3,   0,   0,   3)
+    )),
+    RYDIA("Rydia", 30, 15, "party/Rydia.csv", new GrowthTable(
+            new Stats(-1,   0,   0,  -1,  -1),
+            new Stats(-1,  -1,   0,   0,  -1),
+            new Stats(-1,   0,  -1,   0,  -1),
+            new Stats(1,   1,   1,   1,   1),
+            new Stats(1,   1,   1,   1,   1),
+            new Stats(2,   0,   2,   2,   2),
+            new Stats(3,   3,   0,   3,   3),
+            new Stats(0,   0,   0,   3,   3)
+    )),
+    TELLAH("Tellah", 340, 90, "party/Tellah.csv", new GrowthTable(
+            new Stats(-1,  -1,  -1,  -1,  -1),
+            new Stats(0,   0,   0,   0,   0),
+            new Stats(0,   0,   0,   0,   0),
+            new Stats(0,   0,   0,   0,   0),
+            new Stats(1,   1,   0,   0,   0),
+            new Stats(0,   1,   1,   1,   1),
+            new Stats(0,   1,   0,   1,   0),
+            new Stats(0,   1,   0,   0,   1)
+    )),
+    EDWARD("Edward", 60, 0, "party/Edward.csv", new GrowthTable(
+            new Stats(-1,  -1,  -1,  -1,  -1),
+            new Stats(-1,  -1,  -1,  -1,  -1),
+            new Stats(-1,   0,  -1,  -1,  -1),
+            new Stats(-1,   0,  -1,  -1,  -1),
+            new Stats(1,   1,   0,   1,   1),
+            new Stats(0,   2,   2,   2,   0),
+            new Stats(3,   3,   0,   0,   3),
+            new Stats(4,   0,   4,   4,   4)
+    )),
+    ROSA("Rosa", 150, 80, "party/Rosa.csv", new GrowthTable(
+            new Stats(-1,   0,  -1,   0,   0),
+            new Stats(0,   0,  -1,  -1,   0),
+            new Stats(1,   0,   1,   0,   1),
+            new Stats(1,   1,   1,   0,   1),
+            new Stats(0,   1,   1,   1,   1),
+            new Stats(0,   1,   1,   1,   1),
+            new Stats(1,   1,   1,   1,   1),
+            new Stats(2,   0,   0,   0,   2)
+    )),
+    YANG("Yang", 300, 0, "party/Yang.csv", new GrowthTable(
+            new Stats(-1,  -1,   0,  -1,  -1),
+            new Stats(1,   1,   1,   1,   0),
+            new Stats(1,   1,   1,   0,   0),
+            new Stats(1,   1,   1,   0,   0),
+            new Stats(1,   0,   1,   0,   1),
+            new Stats(2,   2,   2,   0,   0),
+            new Stats(2,   0,   2,   0,   0),
+            new Stats(2,   0,   2,   0,   0)
+    )),
+    POROM("Porom", 100, 50, "party/Porom.csv", new GrowthTable(
+            new Stats(-1,   0,   0,   0,  -1),
+            new Stats(-1,   0,  -1,   0,  -1),
+            new Stats(1,   1,   0,   1,   0),
+            new Stats(1,   1,   1,   1,   1),
+            new Stats(0,   1,   0,   1,   1),
+            new Stats(0,   0,   1,   1,   0),
+            new Stats(0,   0,   2,   2,   2),
+            new Stats(3,   0,   0,   3,   0)
+    )),
+    PALOM("Palom", 110, 50, "party/Palom.csv", new GrowthTable(
+            new Stats(-1,   0,   0,  -1,   0),
+            new Stats(-1,   0,  -1,  -1,   0),
+            new Stats(1,   1,   0,   0,   1),
+            new Stats(1,   1,   1,   1,   1),
+            new Stats(0,   1,   1,   1,   1),
+            new Stats(0,   1,   1,   0,   1),
+            new Stats(2,   0,   0,   2,   2),
+            new Stats(0,   0,   0,   0,   3)
+    )),
+    PALADIN_CECIL("Paladin Cecil", 600, 10, "party/PaladinCecil.csv", new GrowthTable(
+            new Stats(-1,  -1,   0,  -1,  -1),
+            new Stats(0,   1,   1,   1,   1),
+            new Stats(1,   1,   1,   1,   0),
+            new Stats(1,   1,   1,   0,   1),
+            new Stats(0,   0,   1,   1,   0),
+            new Stats(1,   0,   1,   0,   1),
+            new Stats(2,   2,   2,   0,   2),
+            new Stats(3,   0,   0,   0,   0)
+    )),
+    CID("Cid", 788, 0, "party/Cid.csv", new GrowthTable(
+            new Stats(-1,  -1,   0,   0,  -1),
+            new Stats(-1,   0,   0,   0,  -1),
+            new Stats(0,  -1,   0,  -1,   0),
+            new Stats(1,   1,   1,   1,   0),
+            new Stats(2,   2,   2,   0,   0),
+            new Stats(2,   2,   0,   0,   2),
+            new Stats(2,   0,   2,   0,   0),
+            new Stats(3,   0,   3,   0,   0)
+    )),
+    EDGE("Edge", 790, 60, "party/Edge.csv", new GrowthTable(
+            new Stats(-1,  -1,   0,  -1,   0),
+            new Stats(1,   0,   1,   0,   0),
+            new Stats(1,   0,   0,   0,   0),
+            new Stats(0,   1,   0,   0,   0),
+            new Stats(1,   1,   0,   1,   0),
+            new Stats(1,   1,   0,   1,   0),
+            new Stats(2,   0,   2,   0,   0),
+            new Stats(0,   3,   0,   3,   0)
+    )),
+    FUSOYA("FuSoYa", 1900, 190, "party/FuSoYa.csv", new GrowthTable(
+            new Stats(-1,   0,  -1,   0,   0),
+            new Stats(0,   0,   0,  -1,   0),
+            new Stats(0,   0,   0,   0,  -1),
+            new Stats(0,   0,   0,   0,   0),
+            new Stats(0,   1,   0,   1,   1),
+            new Stats(0,   1,   0,   1,   0),
+            new Stats(0,   1,   0,   0,   1),
+            new Stats(1,   0,   1,   0,   0)
+    ));
     private final String name;
     private final int startingHp, startingMp;
+    private final GrowthTable growth;
     private final RangeMap<Integer, Integer> experienceToLevel;
     private final Map<Integer, Stats> levelToStats;
 
@@ -63,10 +181,11 @@ public enum LevelData {
     private static final String WISDOM_COLUMN_HEADER = "wis";
     private static final String WILLPOWER_COLUMN_HEADER = "will";
 
-    private LevelData(String name, int startingHp, int startingMp, String statFile) {
+    private LevelData(String name, int startingHp, int startingMp, String statFile, GrowthTable growth) {
         this.name = name;
         this.startingHp = startingHp;
         this.startingMp = startingMp;
+        this.growth = growth;
         File file = new File(ClassLoader.getSystemClassLoader().getResource(statFile).getFile());
         List<CSVRecord> recordList;
         try {
@@ -133,6 +252,10 @@ public enum LevelData {
     @Override
     public String toString() {
         return name;
+    }
+
+    public GrowthTable getGrowthTable() {
+        return growth;
     }
 
 }
