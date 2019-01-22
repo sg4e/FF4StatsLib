@@ -37,8 +37,21 @@ import sg4e.ff4stats.RecordParser;
  * @author sg4e
  */
 public enum LevelData {
-    DARK_KNIGHT_CECIL("Dark Knight Cecil", "party/DarkKnightCecil.csv");
+    DARK_KNIGHT_CECIL("Dark Knight Cecil", 200, 0, "party/DarkKnightCecil.csv"),
+    KAIN("Kain", 190, 0, "party/Kain.csv"),
+    RYDIA("Rydia", 30, 15, "party/Rydia.csv"),
+    TELLAH("Tellah", 340, 90, "party/Tellah.csv"),
+    EDWARD("Edward", 60, 0, "party/Edward.csv"),
+    ROSA("Rosa", 150, 80, "party/Rosa.csv"),
+    YANG("Yang", 300, 0, "party/Yang.csv"),
+    POROM("Porom", 100, 50, "party/Porom.csv"),
+    PALOM("Palom", 110, 50, "party/Palom.csv"),
+    PALADIN_CECIL("Paladin Cecil", 600, 10, "party/PaladinCecil.csv"),
+    CID("Cid", 788, 0, "party/Cid.csv"),
+    EDGE("Edge", 790, 60, "party/Edge.csv"),
+    FUSOYA("FuSoYa", 1900, 190, "party/FuSoYa.csv");
     private final String name;
+    private final int startingHp, startingMp;
     private final RangeMap<Integer, Integer> experienceToLevel;
     private final Map<Integer, Stats> levelToStats;
 
@@ -50,8 +63,10 @@ public enum LevelData {
     private static final String WISDOM_COLUMN_HEADER = "wis";
     private static final String WILLPOWER_COLUMN_HEADER = "will";
 
-    private LevelData(String name, String statFile) {
+    private LevelData(String name, int startingHp, int startingMp, String statFile) {
         this.name = name;
+        this.startingHp = startingHp;
+        this.startingMp = startingMp;
         File file = new File(ClassLoader.getSystemClassLoader().getResource(statFile).getFile());
         List<CSVRecord> recordList;
         try {
@@ -85,21 +100,34 @@ public enum LevelData {
     }
 
     public int getLevelForTotalExperience(int totalXp) {
+        if(totalXp < 0) {
+            throw new IllegalArgumentException("EXP value cannot be negative");
+        }
         return experienceToLevel.get(totalXp);
     }
 
     /**
-     * Returns null if no stat data for that level.
+     * Returns stats for level or throws {@code IllegalArgumentException} if
+     * level is greater than 70 or below the level at which the character joins
+     * the party.
      *
      * @param level
      * @return
      */
     public Stats getStatsForLevel(int level) {
-        return levelToStats.get(level);
+        if(level > 70) {
+            throw new IllegalArgumentException(level + " is greater than 70. Stat growth past level 70 is nondeterministic");
+        }
+        Stats stats = levelToStats.get(level);
+        if(stats == null) {
+            throw new IllegalArgumentException(level + " is below the minimum level of this party member: "
+                    + levelToStats.keySet().stream().min(Integer::compareTo).get());
+        }
+        return stats;
     }
 
     public Stats getStatsForTotalExperience(int totalXp) {
-        return levelToStats.get(getLevelForTotalExperience(totalXp));
+        return getStatsForLevel(getLevelForTotalExperience(totalXp));
     }
 
     @Override
