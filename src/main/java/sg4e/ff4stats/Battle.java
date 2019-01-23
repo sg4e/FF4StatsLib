@@ -16,8 +16,8 @@
  */
 package sg4e.ff4stats;
 
-import java.io.File;
-import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,10 +37,10 @@ public class Battle {
     
     static {
         Map<Battle, Formation> battleMap = new HashMap<>();
-        ClassLoader classLoader = Battle.class.getClassLoader();
-	File file = new File(classLoader.getResource("bosses.csv").getFile());
+        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+	InputStream inputStream = classLoader.getResourceAsStream("bosses.csv");
         try {
-            Reader reader = new FileReader(file);
+            Reader reader = new InputStreamReader(inputStream);
             Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(reader);
             //skip header line
             records.iterator().next();

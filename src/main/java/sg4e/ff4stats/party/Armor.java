@@ -18,9 +18,9 @@ package sg4e.ff4stats.party;
 
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,10 +47,10 @@ public class Armor implements Equipment {
     
     static {
         Set<Armor> armors = new HashSet<>();
-        File file = new File(ClassLoader.getSystemClassLoader().getResource(ARMOR_FILE).getFile());
+        InputStream inputStream = ClassLoader.getSystemClassLoader().getResourceAsStream(ARMOR_FILE);
         List<CSVRecord> recordList;
         try {
-            Reader reader = new FileReader(file);
+            Reader reader = new InputStreamReader(inputStream);
             recordList = CSVFormat.RFC4180.withHeader().parse(reader).getRecords();
         } catch(IOException ex) {
             ex.printStackTrace();
