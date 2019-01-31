@@ -25,6 +25,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -33,7 +35,7 @@ import java.util.stream.Collectors;
  *
  * @author sg4e
  */
-public class Flag {
+public class Flag implements Comparable<Flag> {
     
     @Parsed
     private String name;
@@ -78,9 +80,15 @@ public class Flag {
     public void setValue(int value) {
         this.value = value;
     }
+
+    @Override
+    public int compareTo(Flag o) {
+        return NATURAL_ORDER.get(this) - NATURAL_ORDER.get(o);
+    }
     
     private static final List<Flag> FLAG_SPEC;
     private static final Map<String, Flag> NAMES_TO_FLAGS;
+    private static final Map<Flag, Integer> NATURAL_ORDER;
     
     static {
         BeanListProcessor<Flag> flagProcessor = new BeanListProcessor<>(Flag.class);
@@ -104,6 +112,12 @@ public class Flag {
         FLAG_SPEC = flags;
         NAMES_TO_FLAGS = Collections.unmodifiableMap(
                 FLAG_SPEC.stream().collect(Collectors.toMap(Flag::getName, Functions.identity())));
+        int index = 0;
+        Map<Flag, Integer> order = new HashMap<>();
+        for(Iterator<Flag> iter = FLAG_SPEC.iterator(); iter.hasNext();) {
+            order.put(iter.next(), index++);
+        }
+        NATURAL_ORDER = Collections.unmodifiableMap(order);
     }
     
     public static List<Flag> getAllFlags() {
