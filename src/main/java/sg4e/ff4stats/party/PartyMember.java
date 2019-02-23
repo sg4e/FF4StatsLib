@@ -16,6 +16,10 @@
  */
 package sg4e.ff4stats.party;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.util.Arrays;
+
 /**
  *
  * @author sg4e
@@ -24,10 +28,68 @@ public class PartyMember {
     
     private int level, xp;
     private Stats currentStats;
+    private final LevelData data;
     
-    //initialize stats growth table for all party members
-    static {
-        
+    public PartyMember(LevelData data) {
+        this(data, data.getStartingLevel());
     }
     
+    public PartyMember(LevelData data, int startingLevel) {
+        if(startingLevel > 99 || startingLevel < data.getStartingLevel())
+            throw new IllegalArgumentException("Not a valid level for this character");
+        this.data = data;
+        this.level = startingLevel;
+        this.xp = 0;
+        currentStats = data.getStatsForLevel(level);
+    }
+    
+    public void gainXp(int xpGained) {
+        int oldXp = xp;
+        if(xpGained != 0) {
+            xp += xpGained;
+            int newLevel = data.getLevelForTotalExperience(xp);
+            int oldLevel = level;
+            level = newLevel;
+            Stats oldStats = currentStats;
+            currentStats = data.getStatsForLevel(level);
+            pcs.firePropertyChange("xp", oldXp, xp);
+            if(oldLevel != newLevel) {
+                pcs.firePropertyChange("level", oldLevel, newLevel);
+            }
+            if(!oldStats.equals(currentStats)) {
+                pcs.firePropertyChange("stats", oldStats, currentStats);
+            }
+        }
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public int getXp() {
+        return xp;
+    }
+
+    public Stats getStats() {
+        return currentStats;
+    }
+
+    public LevelData getData() {
+        return data;
+    }
+    
+    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        this.pcs.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        this.pcs.removePropertyChangeListener(listener);
+    }
+    
+    public boolean hasPropertyChangeListener(PropertyChangeListener listener) {
+        return Arrays.stream(this.pcs.getPropertyChangeListeners()).anyMatch(l -> l.equals(listener));
+    }
+
 }

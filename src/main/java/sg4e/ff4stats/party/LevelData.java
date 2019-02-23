@@ -16,6 +16,7 @@
  */
 package sg4e.ff4stats.party;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableRangeMap;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
@@ -27,7 +28,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import sg4e.ff4stats.RecordParser;
@@ -172,6 +176,7 @@ public enum LevelData {
     private final GrowthTable growth;
     private final RangeMap<Integer, Integer> experienceToLevel;
     private final Map<Integer, Stats> levelToStats;
+    private final Map<Integer, Range<Integer>> hpGains, mpGains;
 
     private static final String EXPERIENCE_COLUMN_HEADER = "xp";
     private static final String LEVEL_COLUMN_HEADER = "level";
@@ -180,6 +185,10 @@ public enum LevelData {
     private static final String VITALITY_COLUMN_HEADER = "vit";
     private static final String WISDOM_COLUMN_HEADER = "wis";
     private static final String WILLPOWER_COLUMN_HEADER = "will";
+    private static final String MIN_HP_COLUMN_HEADER = "minHpGrowth";
+    private static final String MAX_HP_COLUMN_HEADER = "maxHpGrowth";
+    private static final String MIN_MP_COLUMN_HEADER = "minMpGrowth";
+    private static final String MAX_MP_COLUMN_HEADER = "maxMpGrowth";
 
     private LevelData(String name, int startingHp, int startingMp, String statFile, GrowthTable growth) {
         this.name = name;
@@ -196,6 +205,8 @@ public enum LevelData {
             recordList = new ArrayList<>();
         }
         ImmutableRangeMap.Builder<Integer, Integer> mapBuilder = ImmutableRangeMap.<Integer, Integer>builder();
+        ImmutableMap.Builder<Integer, Range<Integer>> hpBuilder = ImmutableMap.<Integer, Range<Integer>>builder();
+        ImmutableMap.Builder<Integer, Range<Integer>> mpBuilder = ImmutableMap.<Integer, Range<Integer>>builder();
         for(int i = 0, size = recordList.size(); i < size; i ++) {
             CSVRecord record = recordList.get(i);
             int xpValue = Integer.parseInt(record.get(EXPERIENCE_COLUMN_HEADER));
@@ -207,6 +218,8 @@ public enum LevelData {
                             Range.closedOpen(xpValue, Integer.parseInt(recordList.get(i + 1).get(EXPERIENCE_COLUMN_HEADER))),
                     Integer.parseInt(record.get(LEVEL_COLUMN_HEADER)));
             //I made this level :)
+            readRangeToMap(record, hpBuilder, MIN_HP_COLUMN_HEADER, MAX_HP_COLUMN_HEADER);
+            readRangeToMap(record, mpBuilder, MIN_MP_COLUMN_HEADER, MAX_MP_COLUMN_HEADER);
         }
         experienceToLevel = mapBuilder.build();
 
@@ -216,6 +229,13 @@ public enum LevelData {
                     return new Stats(p.get(STRENGTH_COLUMN_HEADER), p.get(AGILITY_COLUMN_HEADER), p.get(VITALITY_COLUMN_HEADER),
                             p.get(WISDOM_COLUMN_HEADER), p.get(WILLPOWER_COLUMN_HEADER));
                 })));
+        hpGains = hpBuilder.build();
+        mpGains = mpBuilder.build();
+    }
+    
+    private static void readRangeToMap(CSVRecord record, ImmutableMap.Builder<Integer, Range<Integer>> map, String minHeader, String maxHeader) {
+        map.put(Integer.parseInt(record.get(LEVEL_COLUMN_HEADER)), Range.<Integer>closed(Integer.parseInt(record.get(minHeader)), 
+                Integer.parseInt(record.get(maxHeader))));
     }
 
     public int getLevelForTotalExperience(int totalXp) {
@@ -256,6 +276,48 @@ public enum LevelData {
 
     public GrowthTable getGrowthTable() {
         return growth;
+    }
+    
+    public int getStartingLevel() {
+        return getLevelForTotalExperience(0);
+    }
+    
+    public int getMinimumXpForLevel(int level) {
+        return Math.max(0, experienceToLevel.asMapOfRanges().entrySet().stream().filter(entry -> entry.getValue() == level)
+                .findAny().orElseThrow(() -> new IllegalArgumentException("Not a valid level for this character"))
+                .getKey().lowerEndpoint());
+    }
+    
+    public int getMaximumXpForLevel(int level) {
+        return experienceToLevel.asMapOfRanges().entrySet().stream().filter(entry -> entry.getValue() == level)
+                .findAny().orElseThrow(() -> new IllegalArgumentException("Not a valid level for this character"))
+                .getKey().upperEndpoint();
+    }
+    
+    public int getStartingHp() {
+        return startingHp;
+    }
+    
+    public int getStartingMp() {
+        return startingMp;
+    }
+    
+    public Range<Integer> getHpRangeAtLevel(int level) {
+        return getAdditiveRange(startingHp, hpGains, level);
+    }
+    
+    public Range<Integer> getMpRangeAtLevel(int level) {
+        return getAdditiveRange(startingMp, mpGains, level);
+    }
+    
+    private static Range<Integer> getAdditiveRange(int starting, Map<Integer, Range<Integer>> map, int upToInclusive) {
+        AtomicInteger low = new AtomicInteger();
+        AtomicInteger high = new AtomicInteger();
+        IntStream.rangeClosed(0, upToInclusive).parallel().boxed().map(i -> map.get(i)).filter(Objects::nonNull).forEach(r -> {
+            low.addAndGet(r.lowerEndpoint());
+            high.addAndGet(r.upperEndpoint());
+        });
+        return Range.<Integer>closed(starting + low.get(), starting + high.get());
     }
 
 }
