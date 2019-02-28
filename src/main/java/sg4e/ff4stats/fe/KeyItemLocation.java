@@ -52,7 +52,7 @@ public enum KeyItemLocation {
     LEVIATAN("Leviatan", "Levia", true),
     ASURA("Asura", "Asura", true),
     SYLPH("Sylph", "Sylph", true, PAN),
-    BAHAMAT("Bahamat", "Baham", false, DARKNESS),
+    BAHAMUT("Bahamut", "Baham", false, DARKNESS),
     //Km
     PALE_DIM("Pale Dim", "PlDm", false, DARKNESS),
     WYVERN("Wyvern", "Wyvn", false, DARKNESS),
