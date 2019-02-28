@@ -16,8 +16,11 @@
  */
 package sg4e.ff4stats.fe;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import static sg4e.ff4stats.fe.KeyItem.*;
 
@@ -78,8 +81,25 @@ public enum KeyItemLocation {
         return abbreviation;
     }
     
+    public boolean isInUnderworld() {
+        return inUnderworld;
+    }
+    
+    public Set<KeyItem> getRequiredItemsForAccess() {
+        return new HashSet<>(gatedBy);
+    }
+    
     @Override
     public String toString() {
         return getLocation();
     }
+    
+    public static List<KeyItemLocation> getAccessibleLocations(Collection<KeyItem> keyItems) {
+        List<KeyItemLocation> all = new ArrayList<>(Arrays.asList(KeyItemLocation.values()));
+        if(!keyItems.contains(MAGMA_KEY) && !keyItems.contains(HOOK))
+            all.removeIf(KeyItemLocation::isInUnderworld);
+        all.removeIf(loc -> !keyItems.containsAll(loc.getRequiredItemsForAccess()));
+        return all;
+    }
+    
 }
