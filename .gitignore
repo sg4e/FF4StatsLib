@@ -6,5 +6,3 @@ build
 
 .nb-gradle
 nbproject
-
-src/main/resources/bosses.csv
