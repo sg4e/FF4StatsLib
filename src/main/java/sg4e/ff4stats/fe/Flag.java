@@ -17,19 +17,19 @@
 package sg4e.ff4stats.fe;
 
 import com.google.common.base.Functions;
-import com.univocity.parsers.annotations.Parsed;
-import com.univocity.parsers.common.processor.BeanListProcessor;
-import com.univocity.parsers.csv.CsvParser;
-import com.univocity.parsers.csv.CsvParserSettings;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
+import sg4e.ff4stats.RecordParser;
 
 /**
  *
@@ -37,48 +37,32 @@ import java.util.stream.Collectors;
  */
 public class Flag implements Comparable<Flag> {
     
-    @Parsed
-    private String name;
-    
-    @Parsed
-    private int offset;
-    
-    @Parsed
-    private int size;
-    
-    @Parsed
-    private int value;
+    private final String name;
+    private final int offset;
+    private final int size;
+    private final int value;
+
+    public Flag(String name, int offset, int size, int value) {
+        this.name = name;
+        this.offset = offset;
+        this.size = size;
+        this.value = value;
+    }
 
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public int getOffset() {
         return offset;
     }
 
-    public void setOffset(int offset) {
-        this.offset = offset;
-    }
-
     public int getSize() {
         return size;
     }
 
-    public void setSize(int size) {
-        this.size = size;
-    }
-
     public int getValue() {
         return value;
-    }
-
-    public void setValue(int value) {
-        this.value = value;
     }
 
     @Override
@@ -91,24 +75,22 @@ public class Flag implements Comparable<Flag> {
     private static final Map<Flag, Integer> NATURAL_ORDER;
     
     static {
-        BeanListProcessor<Flag> flagProcessor = new BeanListProcessor<>(Flag.class);
-        CsvParserSettings parserSettings = new CsvParserSettings();
-        parserSettings.setProcessor(flagProcessor);
-        parserSettings.setHeaderExtractionEnabled(true);
-
-        CsvParser parser = new CsvParser(parserSettings);
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 	InputStream inputStream = classLoader.getResourceAsStream("fe/flags.csv");
-        List<Flag> flags = Collections.emptyList();
+        List<Flag> flags = new ArrayList<>();
+        List<CSVRecord> recordList = new ArrayList<>();
         try {
             Reader reader = new InputStreamReader(inputStream);
-            parser.parse(reader);
-            flags = Collections.unmodifiableList(flagProcessor.getBeans());
+            recordList = CSVFormat.RFC4180.withHeader().parse(reader).getRecords();
         }
         catch(Exception ex) {
             System.err.println("Error loading flags.csv");
             ex.printStackTrace();
         }
+        recordList.forEach(record -> {
+            RecordParser p = new RecordParser(record);
+            flags.add(new Flag(record.get(0), p.get(1), p.get(2), p.get(3)));
+        });
         FLAG_SPEC = flags;
         NAMES_TO_FLAGS = Collections.unmodifiableMap(
                 FLAG_SPEC.stream().collect(Collectors.toMap(Flag::getName, Functions.identity())));
