@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Set;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sg4e.ff4stats.RecordParser;
 
 /**
@@ -45,6 +47,7 @@ public class Weapon implements Equipment {
     private static final String WEAPON_FILE = "equipment/weapons.csv";
     private static final Set<Weapon> ALL_WEAPONS;
     private static final Table<String, String, Weapon> WEAPON_TABLE;
+    private static final Logger LOG = LoggerFactory.getLogger(Weapon.class);
     
     static {
         Set<Weapon> weapons = new HashSet<>();
@@ -54,7 +57,7 @@ public class Weapon implements Equipment {
             Reader reader = new InputStreamReader(inputStream);
             recordList = CSVFormat.RFC4180.withHeader().parse(reader).getRecords();
         } catch(IOException ex) {
-            ex.printStackTrace();
+            LOG.error("Error loading weapon stats", ex);
             recordList = new ArrayList<>();
         }
         recordList.forEach(rec -> {

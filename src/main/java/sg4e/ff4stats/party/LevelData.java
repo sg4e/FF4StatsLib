@@ -34,6 +34,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sg4e.ff4stats.RecordParser;
 
 /**
@@ -201,7 +203,8 @@ public enum LevelData {
             Reader reader = new InputStreamReader(inputStream);
             recordList = CSVFormat.RFC4180.withHeader().parse(reader).getRecords();
         } catch(IOException ex) {
-            ex.printStackTrace();
+            Logger log = LoggerFactory.getLogger(LevelData.class);
+            log.error("Error loading character data", ex);
             recordList = new ArrayList<>();
         }
         ImmutableRangeMap.Builder<Integer, Integer> mapBuilder = ImmutableRangeMap.<Integer, Integer>builder();

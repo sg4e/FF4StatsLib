@@ -26,6 +26,8 @@ import java.util.Objects;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.text.WordUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -34,6 +36,7 @@ import org.apache.commons.text.WordUtils;
 public class Battle {
     
     private static final Map<Battle, Formation> ALL_BATTLES;
+    private static final Logger LOG = LoggerFactory.getLogger(Battle.class);
     
     static {
         Map<Battle, Formation> battleMap = new HashMap<>();
@@ -56,8 +59,7 @@ public class Battle {
             }
         }
         catch(Exception ex) {
-            System.err.println("Error loading boss data file");
-            ex.printStackTrace();
+            LOG.error("Error loading boss data file", ex);
         }
         ALL_BATTLES = Collections.unmodifiableMap(battleMap);
     }

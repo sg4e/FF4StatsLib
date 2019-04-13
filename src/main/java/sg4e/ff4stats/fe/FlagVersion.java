@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sg4e.ff4stats.RecordParser;
 
 /**
@@ -44,9 +46,12 @@ public enum FlagVersion {
     private final Map<String, Flag> namesToFlags;
     private final Map<Flag, Integer> naturalOrder;
     
+    private static final Logger LOG = LoggerFactory.getLogger(FlagVersion.class);
+    
     private FlagVersion(String filename) {
+        String filePath = "fe/flagVersions/" + filename + ".csv";
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-	InputStream inputStream = classLoader.getResourceAsStream("fe/flagVersions/" + filename + ".csv");
+	InputStream inputStream = classLoader.getResourceAsStream(filePath);
         List<Flag> flags = new ArrayList<>();
         List<CSVRecord> recordList = new ArrayList<>();
         try {
@@ -54,8 +59,10 @@ public enum FlagVersion {
             recordList = CSVFormat.RFC4180.withHeader().parse(reader).getRecords();
         }
         catch(Exception ex) {
-            System.err.println("Error loading flags.csv");
-            ex.printStackTrace();
+            //it's a compile-time error to call a non-constant static field in an enum's constructor
+            //if this logger becomes used more than just here, move to the outside of the try block
+            Logger log = LoggerFactory.getLogger(FlagVersion.class);
+            log.error("Error loading flag spec data from " + filePath, ex);
         }
         recordList.forEach(record -> {
             RecordParser p = new RecordParser(record);
@@ -107,7 +114,7 @@ public enum FlagVersion {
             case "0.3.4":
                 return VERSION_3_4;
             default:
-                System.out.println("Unrecognized flag version; using latest");
+                LOG.warn("Unrecognized flag version {}; using latest", version);
             case "0.3.5":
             case "0.3.6":
                 return VERSION_3_5;
