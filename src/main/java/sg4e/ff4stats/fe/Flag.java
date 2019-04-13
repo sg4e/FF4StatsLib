@@ -16,23 +16,10 @@
  */
 package sg4e.ff4stats.fe;
 
-import com.google.common.base.Functions;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVRecord;
-import sg4e.ff4stats.RecordParser;
-
 /**
- *
+ * A representation of a FF4FE flag. Flags are tied to a {@link FlagVersion}.
+ * Comparing {@code Flag}s across versions throws an exception.
+ * 
  * @author sg4e
  */
 public class Flag implements Comparable<Flag> {
@@ -41,12 +28,14 @@ public class Flag implements Comparable<Flag> {
     private final int offset;
     private final int size;
     private final int value;
+    private final FlagVersion version;
 
-    public Flag(String name, int offset, int size, int value) {
+    public Flag(String name, int offset, int size, int value, FlagVersion version) {
         this.name = name;
         this.offset = offset;
         this.size = size;
         this.value = value;
+        this.version = version;
     }
 
     public String getName() {
@@ -65,49 +54,16 @@ public class Flag implements Comparable<Flag> {
         return value;
     }
 
+    public FlagVersion getVersion() {
+        return version;
+    }
+
     @Override
     public int compareTo(Flag o) {
-        return NATURAL_ORDER.get(this) - NATURAL_ORDER.get(o);
-    }
-    
-    private static final List<Flag> FLAG_SPEC;
-    private static final Map<String, Flag> NAMES_TO_FLAGS;
-    private static final Map<Flag, Integer> NATURAL_ORDER;
-    
-    static {
-        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-	InputStream inputStream = classLoader.getResourceAsStream("fe/flags.csv");
-        List<Flag> flags = new ArrayList<>();
-        List<CSVRecord> recordList = new ArrayList<>();
-        try {
-            Reader reader = new InputStreamReader(inputStream);
-            recordList = CSVFormat.RFC4180.withHeader().parse(reader).getRecords();
+        if(version != o.getVersion()) {
+            throw new IllegalArgumentException("Cannot compare Flags from different versions");
         }
-        catch(Exception ex) {
-            System.err.println("Error loading flags.csv");
-            ex.printStackTrace();
-        }
-        recordList.forEach(record -> {
-            RecordParser p = new RecordParser(record);
-            flags.add(new Flag(record.get(0), p.get(1), p.get(2), p.get(3)));
-        });
-        FLAG_SPEC = flags;
-        NAMES_TO_FLAGS = Collections.unmodifiableMap(
-                FLAG_SPEC.stream().collect(Collectors.toMap(Flag::getName, Functions.identity())));
-        int index = 0;
-        Map<Flag, Integer> order = new HashMap<>();
-        for(Iterator<Flag> iter = FLAG_SPEC.iterator(); iter.hasNext();) {
-            order.put(iter.next(), index++);
-        }
-        NATURAL_ORDER = Collections.unmodifiableMap(order);
-    }
-    
-    public static List<Flag> getAllFlags() {
-        return FLAG_SPEC;
-    }
-    
-    public static Flag getFlagByName(String name) {
-        return NAMES_TO_FLAGS.get(name);
+        return version.compare(this, o);
     }
     
 }

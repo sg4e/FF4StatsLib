@@ -1,0 +1,117 @@
+/*
+ * Copyright (C) 2019 
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package sg4e.ff4stats.fe;
+
+import com.google.common.base.Functions;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
+import sg4e.ff4stats.RecordParser;
+
+/**
+ *
+ * @author sg4e
+ */
+public enum FlagVersion {
+    VERSION_3_0("3-0"),
+    VERSION_3_4("3-4"),
+    VERSION_3_5("3-5");
+    
+    private final List<Flag> flagSpec;
+    private final Map<String, Flag> namesToFlags;
+    private final Map<Flag, Integer> naturalOrder;
+    
+    private FlagVersion(String filename) {
+        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+	InputStream inputStream = classLoader.getResourceAsStream("fe/flagVersions/" + filename + ".csv");
+        List<Flag> flags = new ArrayList<>();
+        List<CSVRecord> recordList = new ArrayList<>();
+        try {
+            Reader reader = new InputStreamReader(inputStream);
+            recordList = CSVFormat.RFC4180.withHeader().parse(reader).getRecords();
+        }
+        catch(Exception ex) {
+            System.err.println("Error loading flags.csv");
+            ex.printStackTrace();
+        }
+        recordList.forEach(record -> {
+            RecordParser p = new RecordParser(record);
+            flags.add(new Flag(record.get(0), p.get(1), p.get(2), p.get(3), this));
+        });
+        flagSpec = Collections.unmodifiableList(flags);
+        namesToFlags = Collections.unmodifiableMap(
+                flagSpec.stream().collect(Collectors.toMap(Flag::getName, Functions.identity())));
+        int index = 0;
+        Map<Flag, Integer> order = new HashMap<>();
+        for(Iterator<Flag> iter = flagSpec.iterator(); iter.hasNext();) {
+            order.put(iter.next(), index++);
+        }
+        naturalOrder = Collections.unmodifiableMap(order);
+    }
+    
+    int compare(Flag a, Flag b) {
+        return naturalOrder.get(a) - naturalOrder.get(b);
+    }
+    
+    public List<Flag> getAllFlags() {
+        return flagSpec;
+    }
+    
+    public Flag getFlagByName(String name) {
+        return namesToFlags.get(name);
+    }
+    
+    /**
+     * Returns the FlagVersion associated with the provided version string. If
+     * the version is unrecognized/unsupported, the latest FlagVersion is
+     * returned. This behavior allows for the library to support future versions
+     * that do not alter the flag specification without needing recoding;
+     * however, newer flag specification that are not yet supported will cause
+     * errors elsewhere.
+     * 
+     * @param version the version string decoded from the FF4FE binary flag
+     * representation
+     * @return 
+     */
+    public static FlagVersion getFromVersionString(String version) {
+        switch(version) {
+            case "0.3":
+            case "0.3.0":
+            case "0.3.1":
+            case "0.3.2":
+            case "0.3.3":
+                return VERSION_3_0;
+            case "0.3.4":
+                return VERSION_3_4;
+            default:
+                System.out.println("Unrecognized flag version; using latest");
+            case "0.3.5":
+            case "0.3.6":
+                return VERSION_3_5;
+        }
+    }
+    
+}

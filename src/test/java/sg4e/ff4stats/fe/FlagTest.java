@@ -27,12 +27,12 @@ public class FlagTest {
 
     @Test
     public void testFlagCsvLoading() {
-        assertTrue(Flag.getAllFlags().size() > 30);
+        assertTrue(FlagVersion.VERSION_3_0.getAllFlags().size() > 30);
     }
     
     @Test
     public void testFlagMapping() {
-        Flag startRydia = Flag.getFlagByName("-startrydia");
+        Flag startRydia = FlagVersion.VERSION_3_0.getFlagByName("-startrydia");
         //name,offset,size,value
         //-startrydia,19,4,3
         assertEquals(19, startRydia.getOffset());

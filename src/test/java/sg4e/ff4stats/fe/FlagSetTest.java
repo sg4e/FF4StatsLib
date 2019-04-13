@@ -17,48 +17,71 @@
 package sg4e.ff4stats.fe;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 
 /**
  *
  * @author sg4e
  */
+@RunWith(Parameterized.class)
 public class FlagSetTest {
+    
+    @Parameters
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][] {
+                { FlagVersion.VERSION_3_0, "0.3.2", "bAAMCJCQEAMAJBa8O" }, { FlagVersion.VERSION_3_5, "0.3.6", "bAAMGJCQEAMAJCl4d" },  
+        });
+    }
+    
+    @Parameter(0)
+    public FlagVersion flagVersion;
+    
+    @Parameter(1)
+    public String versionString;
+    
+    @Parameter(2)
+    public String binaryFlagString;
 
     @Test
-    public void testFlagSet() {
+    public void testFlagSet3_0() {
         //Ji K Ps C -rescue T4gr S4 B -whyburn Gdmwl Etf Xsbk 
         List<Flag> expectedFlags = ImmutableList.<Flag>builder()
-                .add(Flag.getFlagByName("Ji"))
-                .add(Flag.getFlagByName("K"))
-                .add(Flag.getFlagByName("Ps"))
-                .add(Flag.getFlagByName("C"))
-                .add(Flag.getFlagByName("-rescue"))
-                .add(Flag.getFlagByName("T4"))
-                .add(Flag.getFlagByName("Tg"))
-                .add(Flag.getFlagByName("Tr"))
-                .add(Flag.getFlagByName("S4"))
-                .add(Flag.getFlagByName("B"))
-                .add(Flag.getFlagByName("-whyburn"))
-                .add(Flag.getFlagByName("Gd"))
-                .add(Flag.getFlagByName("Gm"))
-                .add(Flag.getFlagByName("Gw"))
-                .add(Flag.getFlagByName("Gl"))
-                .add(Flag.getFlagByName("Et"))
-                .add(Flag.getFlagByName("Ef"))
-                .add(Flag.getFlagByName("Xs"))
-                .add(Flag.getFlagByName("Xb"))
-                .add(Flag.getFlagByName("Xk"))
+                .add(flagVersion.getFlagByName("Ji"))
+                .add(flagVersion.getFlagByName("K"))
+                .add(flagVersion.getFlagByName("Ps"))
+                .add(flagVersion.getFlagByName("C"))
+                .add(flagVersion.getFlagByName("-rescue"))
+                .add(flagVersion.getFlagByName("T4"))
+                .add(flagVersion.getFlagByName("Tg"))
+                .add(flagVersion.getFlagByName("Tr"))
+                .add(flagVersion.getFlagByName("S4"))
+                .add(flagVersion.getFlagByName("B"))
+                .add(flagVersion.getFlagByName("-whyburn"))
+                .add(flagVersion.getFlagByName("Gd"))
+                .add(flagVersion.getFlagByName("Gm"))
+                .add(flagVersion.getFlagByName("Gw"))
+                .add(flagVersion.getFlagByName("Gl"))
+                .add(flagVersion.getFlagByName("Et"))
+                .add(flagVersion.getFlagByName("Ef"))
+                .add(flagVersion.getFlagByName("Xs"))
+                .add(flagVersion.getFlagByName("Xb"))
+                .add(flagVersion.getFlagByName("Xk"))
                 .build();
         String seed = "MAIKACUTE";
-        FlagSet actual = FlagSet.fromBinary("bAAMCJCQEAMAJBa8O." + seed);
+        FlagSet actual = FlagSet.fromBinary(binaryFlagString + "." + seed);
         assertEquals(expectedFlags, actual.getFlags().stream().collect(Collectors.toList()));
         assertTrue(actual.hasSeed());
         assertEquals(seed, actual.getSeed());
-        assertEquals("0.3.2", actual.getVersion());
+        assertEquals(versionString, actual.getVersion());
         assertEquals("Ji K Ps C -rescue T4gr S4 B -whyburn Gdmwl Etf Xsbk", actual.toString());
     }
     

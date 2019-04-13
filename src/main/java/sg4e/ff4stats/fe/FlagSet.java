@@ -118,7 +118,7 @@ public class FlagSet {
         if(parts.length == 2)
             flagSet.setSeed(parts[1]);
         //check all the flags; a bunch of bitwise ops
-        Flag.getAllFlags().forEach(f -> {
+        FlagVersion.getFromVersionString(flagSet.getVersion()).getAllFlags().forEach(f -> {
             int decodedValue = 0;
             int lowByteIndex = f.getOffset() >> 3;
             if(lowByteIndex < flagStringDecoded.length) {
