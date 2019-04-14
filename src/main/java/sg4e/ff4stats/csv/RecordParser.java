@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package sg4e.ff4stats;
+package sg4e.ff4stats.csv;
 
 import org.apache.commons.csv.CSVRecord;
 
@@ -31,11 +31,29 @@ public class RecordParser {
     }
 
     public int getInteger(int i) {
-        return Integer.parseInt(rec.get(i));
+        return getInteger(i, 0);
     }
     
     public int getInteger(String columnHeader) {
-        return Integer.parseInt(rec.get(columnHeader));
+        return getInteger(columnHeader, 0);
+    }
+    
+    public int getInteger(int i, int defaultValue) {
+        try {
+            return Integer.parseInt(rec.get(i));
+        }
+        catch(NumberFormatException ex) {
+            return defaultValue;
+        }
+    }
+    
+    public int getInteger(String columnHeader, int defaultValue) {
+        try {
+            return Integer.parseInt(rec.get(columnHeader));
+        }
+        catch(NumberFormatException ex) {
+            return defaultValue;
+        }
     }
     
     public String getString(int i) {
