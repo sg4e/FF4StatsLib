@@ -16,15 +16,10 @@
  */
 package sg4e.ff4stats;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,17 +34,13 @@ public class Battle {
     private static final Logger LOG = LoggerFactory.getLogger(Battle.class);
     
     static {
-        Map<Battle, Formation> battleMap = new HashMap<>();
-        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-	InputStream inputStream = classLoader.getResourceAsStream("bosses.csv");
+        Map<Battle, Formation> battleMap = new HashMap<>();        
         try {
-            Reader reader = new InputStreamReader(inputStream);
-            Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(reader);
-            //skip header line
-            records.iterator().next();
-            for (CSVRecord record : records) {
-                Battle battle = new Battle(WordUtils.capitalize(record.get(0)), 
-                        WordUtils.capitalize(record.get(1).split("_slot")[0]));
+            CSVParser csvparser = new CSVParser("bosses.csv");
+            Iterable<RecordParser> records = csvparser.Records;
+            for (RecordParser record : records) {
+                Battle battle = new Battle(WordUtils.capitalize(record.getString(0)), 
+                        WordUtils.capitalize(record.getString(1).split("_slot")[0]));
                 Formation formation = battleMap.get(battle);
                 if(formation == null) {
                     formation = new Formation();

@@ -18,7 +18,6 @@ package sg4e.ff4stats;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.csv.CSVRecord;
 
 /**
  *
@@ -55,16 +54,15 @@ public class Enemy {
         this.scriptValues = scriptValues;
     }
     
-    public static Enemy fromRecord(CSVRecord record) {
-        RecordParser p = new RecordParser(record);
-        String spellPowerString = record.get(18);
+    public static Enemy fromRecord(RecordParser record) {
+        String spellPowerString = record.getString(18);
         List<String> scriptValues = new ArrayList<>();
         for(int index = 19, length = record.size(); index < length; index++) {
-            scriptValues.add(record.get(index));
+            scriptValues.add(record.getString(index));
         }
-        return new Enemy(record.get(2), p.get(3), p.get(4), p.get(5), p.get(6), p.get(7), 
-                p.get(8), p.get(9), p.get(10), p.get(11), p.get(12), p.get(13), 
-                p.get(14), p.get(15), p.get(16), p.get(17),
+        return new Enemy(record.getString(2), record.getInteger(3), record.getInteger(4), record.getInteger(5), record.getInteger(6), record.getInteger(7), 
+                record.getInteger(8), record.getInteger(9), record.getInteger(10), record.getInteger(11), record.getInteger(12), record.getInteger(13), 
+                record.getInteger(14), record.getInteger(15), record.getInteger(16), record.getInteger(17),
                 spellPowerString.length() == 0 ? 0 : Integer.parseInt(spellPowerString), scriptValues);
     }
 

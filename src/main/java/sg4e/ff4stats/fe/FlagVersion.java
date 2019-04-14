@@ -17,9 +17,6 @@
 package sg4e.ff4stats.fe;
 
 import com.google.common.base.Functions;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,11 +24,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sg4e.ff4stats.RecordParser;
+import sg4e.ff4stats.CSVParser;
 
 /**
  *
@@ -50,13 +46,10 @@ public enum FlagVersion {
     
     private FlagVersion(String filename) {
         String filePath = "fe/flagVersions/" + filename + ".csv";
-        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-	InputStream inputStream = classLoader.getResourceAsStream(filePath);
         List<Flag> flags = new ArrayList<>();
-        List<CSVRecord> recordList = new ArrayList<>();
+        List<RecordParser> recordList = new ArrayList<>();
         try {
-            Reader reader = new InputStreamReader(inputStream);
-            recordList = CSVFormat.RFC4180.withHeader().parse(reader).getRecords();
+            recordList = new CSVParser("fe/flagVersions/" + filename + ".csv").Records;
         }
         catch(Exception ex) {
             //it's a compile-time error to call a non-constant static field in an enum's constructor
@@ -65,8 +58,8 @@ public enum FlagVersion {
             log.error("Error loading flag spec data from " + filePath, ex);
         }
         recordList.forEach(record -> {
-            RecordParser p = new RecordParser(record);
-            flags.add(new Flag(record.get(0), p.get(1), p.get(2), p.get(3), this));
+            flags.add(new Flag(record.getString(0), record.getInteger(1), 
+                    record.getInteger(2), record.getInteger(3), this));
         });
         flagSpec = Collections.unmodifiableList(flags);
         namesToFlags = Collections.unmodifiableMap(

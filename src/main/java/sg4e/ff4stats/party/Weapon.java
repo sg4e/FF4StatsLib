@@ -19,18 +19,15 @@ package sg4e.ff4stats.party;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sg4e.ff4stats.RecordParser;
+import sg4e.ff4stats.CSVParser;
 import sg4e.ff4stats.RecordParser;
 
 /**
@@ -51,20 +48,17 @@ public class Weapon implements Equipment {
     
     static {
         Set<Weapon> weapons = new HashSet<>();
-        InputStream inputStream = ClassLoader.getSystemClassLoader().getResourceAsStream(WEAPON_FILE);
-        List<CSVRecord> recordList;
+        List<RecordParser> recordList;
         try {
-            Reader reader = new InputStreamReader(inputStream);
-            recordList = CSVFormat.RFC4180.withHeader().parse(reader).getRecords();
+            recordList = new CSVParser(WEAPON_FILE).Records;
         } catch(IOException ex) {
             LOG.error("Error loading weapon stats", ex);
             recordList = new ArrayList<>();
         }
         recordList.forEach(rec -> {
-            RecordParser p = new RecordParser(rec);
             //name,type,atk,hitPercentage,str,agi,vit,wis,will,canThrow
-            Weapon w = new Weapon(rec.get(0), rec.get(1), p.get(2), p.get(3),
-                    new Stats(p.get(4), p.get(5), p.get(6), p.get(7), p.get(8)), Boolean.parseBoolean(rec.get(9)));
+            Weapon w = new Weapon(rec.getString(0), rec.getString(1), rec.getInteger(2), rec.getInteger(3),
+                    new Stats(rec.getInteger(4), rec.getInteger(5), rec.getInteger(6), rec.getInteger(7), rec.getInteger(8)), rec.getBoolean(9));
             weapons.add(w);
         });
         ALL_WEAPONS = Collections.unmodifiableSet(weapons);

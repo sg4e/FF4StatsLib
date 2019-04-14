@@ -30,12 +30,31 @@ public class RecordParser {
         rec = record;
     }
 
-    public int get(int i) {
+    public int getInteger(int i) {
         return Integer.parseInt(rec.get(i));
     }
     
-    public int get(String columnHeader) {
+    public int getInteger(String columnHeader) {
         return Integer.parseInt(rec.get(columnHeader));
     }
     
+    public String getString(int i) {
+        return rec.get(i);
+    }
+    
+    public String getString(String columnHeader) {
+        return rec.get(columnHeader);
+    }
+    
+    public Boolean getBoolean(int i) {
+        return Boolean.parseBoolean(rec.get(i));
+    }
+    
+    public Boolean getBoolean(String columnHeader) {
+        return Boolean.parseBoolean(rec.get(columnHeader));
+    }
+    
+    public int size() {
+        return rec.size();
+    }
 }
