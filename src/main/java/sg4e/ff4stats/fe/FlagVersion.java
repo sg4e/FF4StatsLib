@@ -43,6 +43,9 @@ public enum FlagVersion {
     
     private static final Logger LOG = LoggerFactory.getLogger(FlagVersion.class);
     
+    public static final String latest = "0.3.6";
+    public static final String earliest = "0.3.0";
+    
     private FlagVersion(String filename) {
         String filePath = "fe/flagVersions/" + filename + ".csv";
         List<Flag> flags = new ArrayList<>();
@@ -95,6 +98,29 @@ public enum FlagVersion {
      * representation
      * @return 
      */
+    
+    public static Flag getFlagFromFlagString(FlagVersion version, String flag, Flag previousFlag) {
+        for(Flag f : version.getAllFlags()) {
+            if(previousFlag != null && previousFlag == f)
+                continue;
+            if(flag.startsWith(f.getName())) {
+                return f;
+            }
+        }
+        System.out.println("Failed to find flag: " + flag);
+        return null;
+    }
+    
+    public static FlagVersion getVersionFromFlagString(String flag) {
+        if(getFlagFromFlagString(VERSION_3_5, flag, null) != null)
+            return VERSION_3_5;
+        if(getFlagFromFlagString(VERSION_3_4, flag, null) != null)
+            return VERSION_3_4;
+        if(getFlagFromFlagString(VERSION_3_0, flag, null) != null)
+            return VERSION_3_0;
+        return null;        
+    }
+    
     public static FlagVersion getFromVersionString(String version) {
         switch(version) {
             case "0.3":

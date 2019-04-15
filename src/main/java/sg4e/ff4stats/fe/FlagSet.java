@@ -16,9 +16,12 @@
  */
 package sg4e.ff4stats.fe;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -67,6 +70,11 @@ public class FlagSet {
     }
     
     private void add(Flag flag) {
+        flags.forEach(f -> {
+            if(flag.getOffset() == f.getOffset() && flag.getValue() != f.getValue()) {
+                throw new IllegalArgumentException("Error: Flag " + flag.getName() + " conflicts with already-set flag " + f.getName());
+            }
+        });
         flags.add(flag);
     }
 
@@ -77,6 +85,13 @@ public class FlagSet {
     @Override
     public String toString() {
         return readableString;
+    }
+    
+    public Boolean contains(String flagString) {
+        for(Flag flag : flags)
+            if(flag.getName().equals(flagString))
+                return true;
+        return false;
     }
     
     public NavigableSet<Flag> getFlags() {
@@ -93,6 +108,54 @@ public class FlagSet {
     
     public static FlagSet fromUrl(String url) {
         return fromBinary(url.split("=")[1]);
+    }
+    
+    public static FlagSet fromString(String text) {
+        FlagVersion version = FlagVersion.getFromVersionString(FlagVersion.latest);        
+        
+        String[] parts = text.split(" ");
+        List<Flag> allFlags = version.getAllFlags();
+        FlagSet flagSet = new FlagSet();
+        HashSet<String> flagStrings = new HashSet<>();
+        HashSet<String> incompatibleFlags = new HashSet<>();
+        flagSet.setReadableString(text);
+        
+        retry:
+        for(String part : parts) {
+            Flag previousFlag = null;
+            while(part.length() > 0) {
+                Flag flag = FlagVersion.getFlagFromFlagString(version, part, previousFlag);
+                if(flag == null) {
+                    version = FlagVersion.getVersionFromFlagString(part);
+                    previousFlag = null;
+                    if(version == null)
+                        throw new IllegalArgumentException("Error: Unrecognized flag: " + part);
+                    flag = FlagVersion.getFlagFromFlagString(version, part, previousFlag);
+                    incompatibleFlags.add(flag.getName());
+                }
+                flagStrings.add(flag.getName());
+                if(flag.getName().length() == 1)
+                    previousFlag = flag;
+                if(part.equals(flag.getName()))
+                    part = "";
+                else {
+                    if(part.startsWith("-"))
+                        throw new IllegalArgumentException("Error: Unrecognized flag: " + part);
+                    part = part.substring(0,1) + part.substring(flag.getName().length());
+                }
+            }
+        }
+        
+        for (String part : flagStrings) {
+            Flag flag = version.getFlagByName(part);
+            if(flag == null) {
+                incompatibleFlags.add(part);
+                throw new IllegalArgumentException("Error: Incompatible flags specified: " + String.join(", ", incompatibleFlags));
+            }
+            flagSet.add(flag);
+        }
+        
+        return flagSet;
     }
     
     public static FlagSet fromBinary(String binary) {
