@@ -1,4 +1,4 @@
-Battle,Position,Enemy,Lvl,HP,XP,GP,Atk Mult,Hit%,Atk,Def Mult,Eva%,Def,MDef Mult,MEv%,MDef,Min Spd,Max Spd,Spell Power,   Values set/checked by script ->,,,
+Battle,Position,Enemy,Lvl,HP,XP,GP,Atk Mult,Hit%,Atk,Def Mult,Eva%,Def,MDef Mult,MEv%,MDef,Min Spd,Max Spd,Spell Power,Values set/checked by script ->,Script value 2,Script Value 3,Script Value 4
 antlion,antlion_slot,Antlion,2,1000,1500,800,2,85,11,0,0,2,2,60,8,5,5,,,,,
 antlion,asura_slot,Antlion,63,23000,20000,0,10,99,134,0,0,0,8,80,37,66,66,,,,,
 antlion,bahamut_slot,Antlion,47,37000,35000,0,13,99,174,0,0,1,1,60,8,27,27,,,,,

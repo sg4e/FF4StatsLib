@@ -21,9 +21,6 @@ import com.google.common.collect.ImmutableRangeMap;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,11 +29,9 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sg4e.ff4stats.RecordParser;
+import sg4e.ff4stats.csv.*;
 
 /**
  *
@@ -197,11 +192,9 @@ public enum LevelData {
         this.startingHp = startingHp;
         this.startingMp = startingMp;
         this.growth = growth;
-        InputStream inputStream = ClassLoader.getSystemClassLoader().getResourceAsStream(statFile);
-        List<CSVRecord> recordList;
+        List<RecordParser> recordList;
         try {
-            Reader reader = new InputStreamReader(inputStream);
-            recordList = CSVFormat.RFC4180.withHeader().parse(reader).getRecords();
+            recordList = new CSVParser(statFile).Records;
         } catch(IOException ex) {
             Logger log = LoggerFactory.getLogger(LevelData.class);
             log.error("Error loading character data", ex);
@@ -211,15 +204,15 @@ public enum LevelData {
         ImmutableMap.Builder<Integer, Range<Integer>> hpBuilder = ImmutableMap.<Integer, Range<Integer>>builder();
         ImmutableMap.Builder<Integer, Range<Integer>> mpBuilder = ImmutableMap.<Integer, Range<Integer>>builder();
         for(int i = 0, size = recordList.size(); i < size; i ++) {
-            CSVRecord record = recordList.get(i);
-            int xpValue = Integer.parseInt(record.get(EXPERIENCE_COLUMN_HEADER));
+            RecordParser record = recordList.get(i);
+            int xpValue = record.getInteger(EXPERIENCE_COLUMN_HEADER);
             //if first data point, all values below the next record's XP value are this level
-            mapBuilder.put(i == 0 ? Range.closedOpen(Integer.MIN_VALUE, Integer.parseInt(recordList.get(i + 1).get(EXPERIENCE_COLUMN_HEADER)))
+            mapBuilder.put(i == 0 ? Range.closedOpen(Integer.MIN_VALUE, recordList.get(i + 1).getInteger(EXPERIENCE_COLUMN_HEADER))
                     : //if final data point, all values above this value are this level
                     i == size - 1 ? Range.closed(xpValue, Integer.MAX_VALUE)
                             : //otherwise, all values between this and the next data point are this level
-                            Range.closedOpen(xpValue, Integer.parseInt(recordList.get(i + 1).get(EXPERIENCE_COLUMN_HEADER))),
-                    Integer.parseInt(record.get(LEVEL_COLUMN_HEADER)));
+                            Range.closedOpen(xpValue, recordList.get(i + 1).getInteger(EXPERIENCE_COLUMN_HEADER)),
+                    record.getInteger(LEVEL_COLUMN_HEADER));
             //I made this level :)
             readRangeToMap(record, hpBuilder, MIN_HP_COLUMN_HEADER, MAX_HP_COLUMN_HEADER);
             readRangeToMap(record, mpBuilder, MIN_MP_COLUMN_HEADER, MAX_MP_COLUMN_HEADER);
@@ -227,18 +220,17 @@ public enum LevelData {
         experienceToLevel = mapBuilder.build();
 
         levelToStats = Collections.unmodifiableMap(recordList.stream().collect(Collectors.toMap(
-                rec -> Integer.parseInt(rec.get(LEVEL_COLUMN_HEADER)), rec -> {
-                    RecordParser p = new RecordParser(rec);
-                    return new Stats(p.get(STRENGTH_COLUMN_HEADER), p.get(AGILITY_COLUMN_HEADER), p.get(VITALITY_COLUMN_HEADER),
-                            p.get(WISDOM_COLUMN_HEADER), p.get(WILLPOWER_COLUMN_HEADER));
+                rec -> rec.getInteger(LEVEL_COLUMN_HEADER), rec -> {
+                    return new Stats(rec.getInteger(STRENGTH_COLUMN_HEADER), rec.getInteger(AGILITY_COLUMN_HEADER), 
+                            rec.getInteger(VITALITY_COLUMN_HEADER), rec.getInteger(WISDOM_COLUMN_HEADER), 
+                            rec.getInteger(WILLPOWER_COLUMN_HEADER));
                 })));
         hpGains = hpBuilder.build();
         mpGains = mpBuilder.build();
     }
     
-    private static void readRangeToMap(CSVRecord record, ImmutableMap.Builder<Integer, Range<Integer>> map, String minHeader, String maxHeader) {
-        map.put(Integer.parseInt(record.get(LEVEL_COLUMN_HEADER)), Range.<Integer>closed(Integer.parseInt(record.get(minHeader)), 
-                Integer.parseInt(record.get(maxHeader))));
+    private static void readRangeToMap(RecordParser record, ImmutableMap.Builder<Integer, Range<Integer>> map, String minHeader, String maxHeader) {
+        map.put(record.getInteger(LEVEL_COLUMN_HEADER), Range.<Integer>closed(record.getInteger(minHeader), record.getInteger(maxHeader)));
     }
 
     public int getLevelForTotalExperience(int totalXp) {
