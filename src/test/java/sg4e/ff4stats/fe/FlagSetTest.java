@@ -83,6 +83,8 @@ public class FlagSetTest {
         assertEquals(seed, actual.getSeed());
         assertEquals(versionString, actual.getVersion());
         assertEquals("Ji K Ps C -rescue T4gr S4 B -whyburn Gdmwl Etf Xsbk", actual.toString());
+        assertTrue(actual.contains("Gw"));
+        assertFalse(actual.contains("-startrosa"));
     }
     
 }
