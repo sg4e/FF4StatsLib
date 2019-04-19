@@ -259,6 +259,82 @@ public enum LevelData {
         }
         return stats;
     }
+    
+    public Stats getMinStatsForLevel(int level) {
+        if (level <= 70) {
+            return getStatsForLevel(level);
+        }
+
+        int str = 0, agi = 0, vit = 0, will = 0, wis = 0;
+        for (int i = 0; i < 8; i++) {
+            Stats g = growth.get(i);
+            if (g.getStrength() < str) {
+                str = g.getStrength();
+            }
+            if (g.getAgility() < agi) {
+                agi = g.getAgility();
+            }
+            if (g.getVitality() < vit) {
+                vit = g.getVitality();
+            }
+            if (g.getWillpower() < will) {
+                will = g.getWillpower();
+            }
+            if (g.getWisdom() < wis) {
+                wis = g.getWisdom();
+            }
+        }
+        Stats level70 = getStatsForLevel(70);
+        str = level70.getStrength() + (str * (level - 70));
+        agi = level70.getAgility() + (agi * (level - 70));
+        vit = level70.getVitality() + (vit * (level - 70));
+        wis = level70.getWisdom() + (wis * (level - 70));
+        will = level70.getWillpower() + (will * (level - 70));
+
+        return new Stats(str < 0 ? 0 : str,
+                agi < 0 ? 0 : agi,
+                vit < 0 ? 0 : vit,
+                wis < 0 ? 0 : wis,
+                will < 0 ? 0 : will);
+    }
+    
+    public Stats getMaxStatsForLevel(int level) {
+        if (level <= 70) {
+            return getStatsForLevel(level);
+        }
+
+        int str = 0, agi = 0, vit = 0, will = 0, wis = 0;
+        for (int i = 0; i < 8; i++) {
+            Stats g = growth.get(i);
+            if (g.getStrength() > str) {
+                str = g.getStrength();
+            }
+            if (g.getAgility() > agi) {
+                agi = g.getAgility();
+            }
+            if (g.getVitality() > vit) {
+                vit = g.getVitality();
+            }
+            if (g.getWillpower() > will) {
+                will = g.getWillpower();
+            }
+            if (g.getWisdom() > wis) {
+                wis = g.getWisdom();
+            }
+        }
+        Stats level70 = getStatsForLevel(70);
+        str = level70.getStrength() + (str * (level - 70));
+        agi = level70.getAgility() + (agi * (level - 70));
+        vit = level70.getVitality() + (vit * (level - 70));
+        wis = level70.getWisdom() + (wis * (level - 70));
+        will = level70.getWillpower() + (will * (level - 70));
+
+        return new Stats(str > 255 ? 255 : str,
+                agi > 255 ? 255 : agi,
+                vit > 255 ? 255 : vit,
+                wis > 255 ? 255 : wis,
+                will > 255 ? 255 : will);
+    }
 
     public Stats getStatsForTotalExperience(int totalXp) {
         return getStatsForLevel(getLevelForTotalExperience(totalXp));

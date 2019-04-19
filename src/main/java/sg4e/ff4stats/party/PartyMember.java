@@ -27,7 +27,7 @@ import java.util.Arrays;
 public class PartyMember {
     
     private int level, xp;
-    private Stats currentStats;
+    private Stats currentStats, currentStatsMax;
     private final LevelData data;
     
     public PartyMember(LevelData data) {
@@ -40,7 +40,8 @@ public class PartyMember {
         this.data = data;
         this.level = startingLevel;
         this.xp = 0;
-        currentStats = data.getStatsForLevel(level);
+        currentStats = data.getMinStatsForLevel(level);
+        currentStatsMax = data.getMaxStatsForLevel(level);
     }
     
     public void gainXp(int xpGained) {
@@ -51,7 +52,8 @@ public class PartyMember {
             int oldLevel = level;
             level = newLevel;
             Stats oldStats = currentStats;
-            currentStats = data.getStatsForLevel(level);
+            currentStats = data.getMinStatsForLevel(level);
+            currentStatsMax = data.getMaxStatsForLevel(level);
             pcs.firePropertyChange("xp", oldXp, xp);
             if(oldLevel != newLevel) {
                 pcs.firePropertyChange("level", oldLevel, newLevel);
@@ -72,6 +74,10 @@ public class PartyMember {
 
     public Stats getStats() {
         return currentStats;
+    }
+    
+    public Stats getStatsMax() {
+        return currentStatsMax;
     }
 
     public LevelData getData() {
