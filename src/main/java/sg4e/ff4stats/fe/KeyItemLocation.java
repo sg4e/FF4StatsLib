@@ -60,7 +60,11 @@ public enum KeyItemLocation {
     DLUNAR("D Lunar", "DLunr", false, DARKNESS),
     OGOPOGO("Ogopogo", "Ogpg", false, DARKNESS),
     //Nk
-    MIST("D Mist", "Mist", false);
+    MIST("D Mist", "Mist", false),
+    //V1
+    KOKKOL("Kokkol's", "Kokkl", true, ADAMANT, KeyItem.LEGEND),
+    //K0
+    ZEROMUS("Zeromus", "Zmus", false);    
     
     private final String name, abbreviation;
     private final Set<KeyItem> gatedBy;
