@@ -54,6 +54,7 @@ public class KeyItemLocationTest {
         assertEquals(expected, getAccessibleLocations(kis2));
     }
     
+    @Test
     public void testKeyItem() {
         expected.add(ZOT);
         expected.add(MIST);
