@@ -60,7 +60,11 @@ public enum KeyItemLocation {
     DLUNAR("D Lunar", "DLunr", false, DARKNESS),
     OGOPOGO("Ogopogo", "Ogpg", false, DARKNESS),
     //Nk
-    MIST("D Mist", "Mist", false);
+    MIST("D Mist", "Mist", false),
+    //V1
+    KOKKOL("Kokkol's", "Kokkl", true, ADAMANT, KeyItem.LEGEND),
+    //K0
+    ZEROMUS("Zeromus", "Zmus", false);    
     
     private final String name, abbreviation;
     private final Set<KeyItem> gatedBy;
@@ -98,6 +102,8 @@ public enum KeyItemLocation {
         List<KeyItemLocation> all = new ArrayList<>(Arrays.asList(KeyItemLocation.values()));
         if(!keyItems.contains(MAGMA_KEY) && !keyItems.contains(HOOK))
             all.removeIf(KeyItemLocation::isInUnderworld);
+        if(!keyItems.contains(PASS) && !keyItems.contains(DARKNESS))
+            all.remove(ZEROMUS);
         all.removeIf(loc -> !keyItems.containsAll(loc.getRequiredItemsForAccess()));
         return all;
     }

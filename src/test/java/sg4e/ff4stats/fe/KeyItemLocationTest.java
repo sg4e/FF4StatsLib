@@ -54,6 +54,28 @@ public class KeyItemLocationTest {
         assertEquals(expected, getAccessibleLocations(kis2));
     }
     
+    @Test
+    public void testMoon() {
+        expected.addAll(Arrays.asList(new KeyItemLocation[] {BAHAMUT, PALE_DIM, WYVERN, PLAGUE, DLUNAR, OGOPOGO, MIST, ZEROMUS}));
+        List<KeyItem> kis = Arrays.asList(new KeyItem[] {DARKNESS});
+        assertEquals(expected, getAccessibleLocations(kis));
+    }
+    
+    @Test
+    public void testPass() {
+        expected.addAll(Arrays.asList(new KeyItemLocation[] {MIST, ZEROMUS}));
+        List<KeyItem> kis = Arrays.asList(new KeyItem[] {PASS});
+        assertEquals(expected, getAccessibleLocations(kis));
+    }
+    
+    @Test
+    public void testForge() {
+        expected.addAll(Arrays.asList(new KeyItemLocation[] {TOP_BABIL, DWARF_CASTLE, SHEILA_PANLESS, SUMMONED_MONSTERS_CHEST, LEVIATAN, ASURA, MIST, KOKKOL}));
+        List<KeyItem> kis = Arrays.asList(new KeyItem[] {MAGMA_KEY, ADAMANT, LEGEND});
+        assertEquals(expected, getAccessibleLocations(kis));
+    }
+    
+    @Test
     public void testKeyItem() {
         expected.add(ZOT);
         expected.add(MIST);
