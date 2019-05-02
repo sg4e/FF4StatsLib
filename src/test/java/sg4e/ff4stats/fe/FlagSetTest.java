@@ -38,7 +38,9 @@ public class FlagSetTest {
     @Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
-                { FlagVersion.VERSION_3_0, "0.3.2", "bAAMCJCQEAMAJBa8O" }, { FlagVersion.VERSION_3_5, "0.3.6", "bAAMGJCQEAMAJCl4d" },  
+            { FlagVersion.VERSION_3_0, "0.3.2", "bAAMCJCQEAMAJBa8O" }, 
+            { FlagVersion.VERSION_3_5, "0.3.6", "bAAMGJCQEAMAJCl4d" },
+            { FlagVersion.VERSION_3_7, "0.3.7", "bAAMHJCQEAMAJCl46" },
         });
     }
     
