@@ -35,7 +35,8 @@ import sg4e.ff4stats.csv.*;
 public enum FlagVersion {
     VERSION_3_0("3-0"),
     VERSION_3_4("3-4"),
-    VERSION_3_5("3-5");
+    VERSION_3_5("3-5"),
+    VERSION_3_7("3-7");
     
     private final List<Flag> flagSpec;
     private final Map<String, Flag> namesToFlags;
@@ -43,7 +44,7 @@ public enum FlagVersion {
     
     private static final Logger LOG = LoggerFactory.getLogger(FlagVersion.class);
     
-    public static final String latest = "0.3.6";
+    public static final String latest = "0.3.7";
     public static final String earliest = "0.3.0";
     
     private FlagVersion(String filename) {
@@ -112,6 +113,8 @@ public enum FlagVersion {
     }
     
     public static FlagVersion getVersionFromFlagString(String flag) {
+        if(getFlagFromFlagString(VERSION_3_7, flag, null) != null)
+            return VERSION_3_7;
         if(getFlagFromFlagString(VERSION_3_5, flag, null) != null)
             return VERSION_3_5;
         if(getFlagFromFlagString(VERSION_3_4, flag, null) != null)
@@ -123,19 +126,23 @@ public enum FlagVersion {
     
     public static FlagVersion getFromVersionString(String version) {
         switch(version) {
-            case "0.3":
-            case "0.3.0":
-            case "0.3.1":
-            case "0.3.2":
-            case "0.3.3":
-                return VERSION_3_0;
-            case "0.3.4":
-                return VERSION_3_4;
             default:
                 LOG.warn("Unrecognized flag version {}; using latest", version);
-            case "0.3.5":
+            case "0.3.7":
+                return VERSION_3_7;
             case "0.3.6":
+            case "0.3.5":
                 return VERSION_3_5;
+            case "0.3.4":
+                return VERSION_3_4;
+            case "0.3.3":
+            case "0.3.2":
+            case "0.3.1":
+            case "0.3.0":
+            case "0.3":
+                return VERSION_3_0;
+            
+            
         }
     }
     
