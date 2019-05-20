@@ -19,6 +19,7 @@ package sg4e.ff4stats.party;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  *
@@ -27,6 +28,7 @@ import java.util.Arrays;
 public class PartyMember {
     
     private int level, xp;
+    private Integer startingLevel, startingXp;
     private Stats currentStats, currentStatsMax;
     private final LevelData data;
     
@@ -39,7 +41,7 @@ public class PartyMember {
             throw new IllegalArgumentException("Not a valid level for this character");
         this.data = data;
         this.level = startingLevel;
-        this.xp = 0;
+        this.xp = data.getMinimumXpForLevel(startingLevel);
         currentStats = data.getMinStatsForLevel(level);
         currentStatsMax = data.getMaxStatsForLevel(level);
     }
@@ -61,6 +63,67 @@ public class PartyMember {
             if(!oldStats.equals(currentStats)) {
                 pcs.firePropertyChange("stats", oldStats, currentStats);
             }
+        }
+    }
+    
+    public void resetXp() {
+        int oldXp = xp;
+        int oldLevel = level;
+        Stats oldStats = currentStats;
+        
+        xp = (startingXp != null ? startingXp : 0);
+        level = (startingLevel != null ? startingLevel : data.getLevelForTotalExperience(xp));
+        currentStats = data.getMinStatsForLevel(level);
+        currentStatsMax = data.getMaxStatsForLevel(level);
+        
+        if(oldXp != xp) {
+            pcs.firePropertyChange("xp", oldXp, xp);
+        }
+        if(oldLevel != level) {
+            pcs.firePropertyChange("level", oldLevel, level);
+        }
+        if(!oldStats.equals(currentStats)) {
+            pcs.firePropertyChange("stats", oldStats, currentStats);
+        }
+    }
+    
+    public Integer getStartingLevel() {
+        return startingLevel;
+    }
+    
+    public Integer getStartingXP() {
+        return startingXp;
+    }
+    
+    public void setStartingLevel(Integer level) {
+        Integer oldLevel = startingLevel;
+        if(level != null && (level > 99 || level < data.getStartingLevel()))
+            throw new IllegalArgumentException("Valid level for " + data.name() + " is " + data.getStartingLevel() + "-99");
+        
+        startingLevel = level;
+        if(!Objects.equals(oldLevel, startingLevel)) {
+            pcs.firePropertyChange("Start Level", oldLevel, level);
+        }
+    }
+    
+    public void setStartingXp(Integer xp) {
+        Integer oldXp = startingXp;
+        
+        int level = data.getStartingLevel();
+        if(startingLevel != null)
+            level = startingLevel;
+        
+        int minXP = data.getMinimumXpForLevel(level);
+        int maxXP = data.getMaximumXpForLevel(level) - 1;
+        if(level == 99)
+            maxXP = 9999999;
+        
+        if(xp != null && startingLevel != null && (xp < minXP || xp > maxXP))
+            throw new IllegalArgumentException("Valid XP for " + data.name() + " at level " + level + " is " + minXP + "-" + maxXP);
+        
+        startingXp = xp;        
+        if(!Objects.equals(oldXp, startingXp)) {
+            pcs.firePropertyChange("Start XP", oldXp, xp);
         }
     }
 
