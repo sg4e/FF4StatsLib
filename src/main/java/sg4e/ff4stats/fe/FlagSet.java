@@ -24,6 +24,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -31,6 +33,12 @@ import java.util.stream.Collectors;
  * @author sg4e
  */
 public class FlagSet {
+    
+    private final static Pattern BINARY_FLAGSET_PATTERN = Pattern.compile(
+            "b(?<version>[A-Za-z0-9_\\-]{4})" + // Version
+            "(?<flags>[A-Za-z0-9_\\-]*)" +      // Flags
+            "(?:\\.(?<seed>[A-Z0-9]{1,10})" +   // Seed
+            "(?:\\.test\\.[0-9a-f]{8})?)?");    // Handler for test seeds
     
     private final TreeSet<Flag> flags = new TreeSet<>();
     private String version, binary;
@@ -128,10 +136,13 @@ public class FlagSet {
     }
     
     public static FlagSet fromUrl(String url) {
-        return fromBinary(url.split("=")[1]);
+        return fromBinary(url);
     }
     
     public static FlagSet fromString(String text) {
+       if(BINARY_FLAGSET_PATTERN.matcher(text).find())
+           return fromBinary(text);
+        
         FlagVersion version = FlagVersion.getFromVersionString(FlagVersion.latest);        
         
         String[] parts = text.split(" ");
@@ -180,26 +191,22 @@ public class FlagSet {
     
     public static FlagSet fromBinary(String binary) {
         //first character is 'b'; '+' is encoded as '-' and '/' as '_'
-        if(binary.charAt(0) != 'b')
+        Matcher matcher = BINARY_FLAGSET_PATTERN.matcher(binary);
+        
+        if(!matcher.find())
             throw new IllegalArgumentException("Not a binary flag string");
-        String cleaned = binary.trim().substring(1).replaceAll("-", "+").replaceAll("_", "/");
+        String cleaned = binary.trim().substring(1);
         //next 4 chars encode version
-        String version = cleaned.substring(0, 4);
-        byte[] versionBytes = Base64.getDecoder().decode(version);
+        byte[] versionBytes = Base64.getUrlDecoder().decode(matcher.group("version"));
         int[] versionInts = new int[versionBytes.length];
         for(int i = 0; i < versionBytes.length; i++)
             versionInts[i] = (int) versionBytes[i];
         FlagSet flagSet = new FlagSet();
         flagSet.setBinary(binary);
         flagSet.setVersion(Arrays.stream(versionInts).mapToObj(Integer::toString).collect(Collectors.joining(".")));
-        //next is {flags}.{seed}
-        String[] parts = cleaned.substring(4).split("\\.");
-        if(parts.length > 2)
-            throw new IllegalArgumentException("Malformed flag string: multiple periods (.)");
-        String flagString = parts[0];
-        byte[] flagStringDecoded = Base64.getDecoder().decode(flagString);
-        if(parts.length == 2)
-            flagSet.setSeed(parts[1]);
+        //next is {flags}.{seed}        
+        byte[] flagStringDecoded = Base64.getUrlDecoder().decode(matcher.group("flags"));
+        flagSet.setSeed(matcher.group("seed"));
         //check all the flags; a bunch of bitwise ops
         FlagVersion.getFromVersionString(flagSet.getVersion()).getAllFlags().forEach(f -> {
             int decodedValue = 0;
