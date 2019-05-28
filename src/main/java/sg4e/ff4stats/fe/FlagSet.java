@@ -87,6 +87,27 @@ public class FlagSet {
         return readableString;
     }
     
+    public String sorted() {
+        //make string representation
+        StringBuilder s = new StringBuilder();
+        String lastFlag = "";
+        for(Flag f : getFlags()) {
+            String currentFlag = f.getName();
+            char first = currentFlag.charAt(0);
+            if(first != '-' && lastFlag.startsWith(first + "")) {
+                s.append(currentFlag.substring(1));
+            }
+            else {
+                if(s.length() != 0)
+                    s.append(" ");
+                s.append(currentFlag);
+            }
+            lastFlag = currentFlag;
+        }
+        
+        return s.toString();
+    }
+    
     public Boolean contains(String flagString) {
         for(Flag flag : flags)
             if(flag.getName().equals(flagString))
@@ -110,27 +131,6 @@ public class FlagSet {
         return fromBinary(url.split("=")[1]);
     }
     
-    private static void setNaturalFlagOrder(FlagSet flagSet) {
-        //make string representation
-        StringBuilder s = new StringBuilder();
-        String lastFlag = "";
-        for(Flag f : flagSet.getFlags()) {
-            String currentFlag = f.getName();
-            char first = currentFlag.charAt(0);
-            if(first != '-' && lastFlag.startsWith(first + "")) {
-                s.append(currentFlag.substring(1));
-            }
-            else {
-                if(s.length() != 0)
-                    s.append(" ");
-                s.append(currentFlag);
-            }
-            lastFlag = currentFlag;
-        }
-        
-        flagSet.setReadableString(s.toString());
-    }
-    
     public static FlagSet fromString(String text) {
         FlagVersion version = FlagVersion.getFromVersionString(FlagVersion.latest);        
         
@@ -141,7 +141,6 @@ public class FlagSet {
         HashSet<String> incompatibleFlags = new HashSet<>();
         flagSet.setReadableString(text);
         
-        retry:
         for(String part : parts) {
             Flag previousFlag = null;
             while(part.length() > 0) {
@@ -175,7 +174,6 @@ public class FlagSet {
             }
             flagSet.add(flag);
         }
-        setNaturalFlagOrder(flagSet);
         
         return flagSet;
     }
@@ -221,7 +219,7 @@ public class FlagSet {
             if(decodedValue == f.getValue())
                 flagSet.add(f);
         });
-        setNaturalFlagOrder(flagSet);
+        flagSet.setReadableString(flagSet.sorted());
         
         return flagSet;
     }
