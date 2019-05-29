@@ -95,7 +95,7 @@ public class FlagSet {
         return readableString;
     }
     
-    public String sorted() {
+    private String sorted() {
         //make string representation
         StringBuilder s = new StringBuilder();
         String lastFlag = "";
@@ -150,7 +150,6 @@ public class FlagSet {
         FlagSet flagSet = new FlagSet();
         HashSet<String> flagStrings = new HashSet<>();
         HashSet<String> incompatibleFlags = new HashSet<>();
-        flagSet.setReadableString(text);
         
         for(String part : parts) {
             Flag previousFlag = null;
@@ -185,6 +184,7 @@ public class FlagSet {
             }
             flagSet.add(flag);
         }
+        flagSet.setReadableString(flagSet.sorted());
         
         return flagSet;
     }
