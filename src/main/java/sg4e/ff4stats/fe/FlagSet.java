@@ -16,6 +16,9 @@
  */
 package sg4e.ff4stats.fe;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -135,13 +138,26 @@ public class FlagSet {
         return "http://ff4fe.com/make?flags=" + toString().replaceAll(" ", "+");
     }
     
+    public static FlagSet from(String string) {
+        if(BINARY_FLAGSET_PATTERN.matcher(string).find())
+           return fromBinary(string);
+        else
+            return fromString(string);
+    }
+    
     public static FlagSet fromUrl(String url) {
-        return fromBinary(url);
+        try {
+            new URL(url).toURI();
+            return fromBinary(url);
+        }
+        catch (URISyntaxException | MalformedURLException ex) {
+            throw new IllegalArgumentException("Malformed URL: " + ex.getMessage(), ex);
+        }
     }
     
     public static FlagSet fromString(String text) {
-       if(BINARY_FLAGSET_PATTERN.matcher(text).find())
-           return fromBinary(text);
+        if(BINARY_FLAGSET_PATTERN.matcher(text).find())
+            throw new IllegalArgumentException("Malformed human readable flag string: " + text);
         
         FlagVersion version = FlagVersion.getFromVersionString(FlagVersion.latest);        
         
