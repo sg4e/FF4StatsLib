@@ -20,6 +20,7 @@ import com.google.common.base.Functions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ public enum FlagVersion {
     VERSION_3_5("3-5"),
     VERSION_3_7("3-7");
     
+    private static final HashSet<FlagVersion> triedVersions = new HashSet<>();
     private final List<Flag> flagSpec;
     private final Map<String, Flag> namesToFlags;
     private final Map<Flag, Integer> naturalOrder;
@@ -100,28 +102,34 @@ public enum FlagVersion {
      * @return 
      */
     
-    public static Flag getFlagFromFlagString(FlagVersion version, String flag, Flag previousFlag) {
+    public static Flag getFlagFromFlagString(FlagVersion version, String flag, Flag previousFlag) {        
         for(Flag f : version.getAllFlags()) {
-            if(previousFlag != null && previousFlag == f)
+            if((previousFlag != null && previousFlag == f) || (flag.startsWith("-") && !flag.equals(f.getName())))
                 continue;
             if(flag.startsWith(f.getName())) {
+                if(previousFlag != null || flag.equals(f.getName()))
+                    triedVersions.clear();
                 return f;
             }
         }
-        System.out.println("Failed to find flag: " + flag);
+        
+        LOG.warn("Failed to find flag: {}", flag);
+        triedVersions.add(version);
         return null;
     }
     
     public static FlagVersion getVersionFromFlagString(String flag) {
-        if(getFlagFromFlagString(VERSION_3_7, flag, null) != null)
+        if(getFlagFromFlagString(VERSION_3_7, flag, null) != null && !triedVersions.contains(VERSION_3_7))
             return VERSION_3_7;
-        if(getFlagFromFlagString(VERSION_3_5, flag, null) != null)
+        if(getFlagFromFlagString(VERSION_3_5, flag, null) != null && !triedVersions.contains(VERSION_3_5))
             return VERSION_3_5;
-        if(getFlagFromFlagString(VERSION_3_4, flag, null) != null)
+        if(getFlagFromFlagString(VERSION_3_4, flag, null) != null && !triedVersions.contains(VERSION_3_4))
             return VERSION_3_4;
-        if(getFlagFromFlagString(VERSION_3_0, flag, null) != null)
+        if(getFlagFromFlagString(VERSION_3_0, flag, null) != null && !triedVersions.contains(VERSION_3_0))
             return VERSION_3_0;
-        return null;        
+        
+        triedVersions.clear();
+        return null;
     }
     
     public static FlagVersion getFromVersionString(String version) {
