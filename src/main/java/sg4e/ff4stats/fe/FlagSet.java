@@ -17,6 +17,7 @@
 package sg4e.ff4stats.fe;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -141,18 +142,44 @@ public class FlagSet {
     public static FlagSet from(String string) {
         if(BINARY_FLAGSET_PATTERN.matcher(string).find())
            return fromBinary(string);
-        else
-            return fromString(string);
+        else {
+            try {
+                new URL(string).toURI();
+                return fromUrl(string);
+            }
+            catch (MalformedURLException | URISyntaxException ex) {
+                return fromString(string);
+            }
+        }
     }
     
     public static FlagSet fromUrl(String url) {
+        URI uri;
         try {
-            new URL(url).toURI();
-            return fromBinary(url);
+            uri = new URL(url).toURI();            
         }
         catch (URISyntaxException | MalformedURLException ex) {
             throw new IllegalArgumentException("Malformed URL: " + ex.getMessage(), ex);
         }
+        
+        if(BINARY_FLAGSET_PATTERN.matcher(url).find()) {
+            return fromBinary(url);
+        }
+        else {
+            for(String s : uri.getQuery().split("&")) {
+                try {
+                    String[] ss = s.split("=", 2);
+                    if(ss.length == 1)
+                        continue;
+                    return fromString(ss[1].replace("+", " "));
+                }
+                catch (Exception ex) {
+                    continue;
+                }
+            }
+            return fromString("");
+        }
+        
     }
     
     public static FlagSet fromString(String text) {
