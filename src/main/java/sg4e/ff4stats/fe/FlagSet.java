@@ -139,6 +139,10 @@ public class FlagSet {
         return "http://ff4fe.com/make?flags=" + toString().replaceAll(" ", "+");
     }
     
+    private static int ubyte(int value) {
+        return (value < 0) ? (value + 256) : value;
+    }
+    
     public static FlagSet from(String string) {
         if(BINARY_FLAGSET_PATTERN.matcher(string).find())
            return fromBinary(string);
@@ -256,12 +260,12 @@ public class FlagSet {
             int lowByteIndex = f.getOffset() >> 3;
             if(lowByteIndex < flagStringDecoded.length) {
                 int lowByteShift = f.getOffset() & 7;
-                decodedValue = flagStringDecoded[lowByteIndex] >> lowByteShift;
+                decodedValue = ubyte(flagStringDecoded[lowByteIndex]) >> lowByteShift;
                 int numOverflowBytes = ((f.getSize() - 1) >> 3) + 1;
                 for(int i = 1; i <= numOverflowBytes; i++) {
                     if(lowByteIndex + i >= flagStringDecoded.length)
                         break;
-                    decodedValue |= flagStringDecoded[lowByteIndex + i] << (8 * i - lowByteShift);
+                    decodedValue |= ubyte(flagStringDecoded[lowByteIndex + i]) << (8 * i - lowByteShift);
                 }
                 int mask = (1 << f.getSize()) - 1;
                 decodedValue &= mask;
