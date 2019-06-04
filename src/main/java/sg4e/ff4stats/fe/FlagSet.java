@@ -39,10 +39,10 @@ import java.util.stream.Collectors;
 public class FlagSet {
     
     private final static Pattern BINARY_FLAGSET_PATTERN = Pattern.compile(
-            "b(?<version>[A-Za-z0-9_\\-]{4})" + // Version
+            "(?<binary>b(?<version>[A-Za-z0-9_\\-]{4})" + // Version
             "(?<flags>[A-Za-z0-9_\\-]*)" +      // Flags
             "(?:\\.(?<seed>[A-Z0-9]{1,10})" +   // Seed
-            "(?:\\.test\\.[0-9a-f]{8})?)?");    // Handler for test seeds
+            "(?:\\.test\\.[0-9a-f]{8})?)?)");    // Handler for test seeds
     
     private final TreeSet<Flag> flags = new TreeSet<>();
     private String version, binary;
@@ -242,14 +242,13 @@ public class FlagSet {
         
         if(!matcher.find())
             throw new IllegalArgumentException("Not a binary flag string");
-        String cleaned = binary.trim().substring(1);
         //next 4 chars encode version
         byte[] versionBytes = Base64.getUrlDecoder().decode(matcher.group("version"));
         int[] versionInts = new int[versionBytes.length];
         for(int i = 0; i < versionBytes.length; i++)
             versionInts[i] = (int) versionBytes[i];
         FlagSet flagSet = new FlagSet();
-        flagSet.setBinary(binary);
+        flagSet.setBinary(matcher.group("binary"));
         flagSet.setVersion(Arrays.stream(versionInts).mapToObj(Integer::toString).collect(Collectors.joining(".")));
         //next is {flags}.{seed}        
         byte[] flagStringDecoded = Base64.getUrlDecoder().decode(matcher.group("flags"));
