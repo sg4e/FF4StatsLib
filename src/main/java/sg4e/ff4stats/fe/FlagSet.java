@@ -223,8 +223,11 @@ public class FlagSet {
             }
         }
         
+        int maxOffset = -1;
         for (String part : flagStrings) {
             Flag flag = version.getFlagByName(part);
+            if(maxOffset < (flag.getOffset() + (flag.getSize() - 1)))
+                maxOffset = flag.getOffset() + (flag.getSize() - 1);
             if(flag == null) {
                 incompatibleFlags.add(part);
                 throw new IllegalArgumentException("Error: Incompatible flags specified: " + String.join(", ", incompatibleFlags));
@@ -232,6 +235,29 @@ public class FlagSet {
             flagSet.add(flag);
         }
         flagSet.setReadableString(flagSet.sorted());
+        
+        maxOffset >>= 3;
+        byte[] flagStringDecoded = new byte[maxOffset+1];
+        flagSet.getFlags().forEach(f -> {
+           //int decodedValue = 0;
+           int lowByteIndex = f.getOffset() >> 3;
+           if(lowByteIndex < flagStringDecoded.length) {
+                int lowByteShift = f.getOffset() & 7;
+                flagStringDecoded[lowByteIndex] |= (f.getValue() << lowByteShift) & 0xFF;
+                //decodedValue = ubyte(flagStringDecoded[lowByteIndex]) >> lowByteShift;
+                int numOverflowBytes = ((f.getSize() - 1) >> 3) + 1;
+                for(int i = 1; i <= numOverflowBytes; i++) {
+                    if(lowByteIndex + i >= flagStringDecoded.length)
+                        break;
+                    flagStringDecoded[lowByteIndex + i] |= (f.getValue() >> (8 * i - lowByteShift));
+                    //decodedValue |= ubyte(flagStringDecoded[lowByteIndex + i]) << (8 * i - lowByteShift);
+                }
+                //int mask = (1 << f.getSize()) - 1;
+                //decodedValue &= mask;
+            }
+        });
+        String binaryFlagString = Base64.getUrlEncoder().encodeToString(flagStringDecoded);
+        flagSet.setBinary(version.getBinaryFlagVersion() + binaryFlagString.replace("=", ""));
         
         return flagSet;
     }

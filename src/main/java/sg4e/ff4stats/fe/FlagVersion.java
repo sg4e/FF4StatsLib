@@ -34,22 +34,23 @@ import sg4e.ff4stats.csv.*;
  * @author sg4e
  */
 public enum FlagVersion {
-    VERSION_3_0("3-0"),
-    VERSION_3_4("3-4"),
-    VERSION_3_5("3-5"),
-    VERSION_3_7("3-7");
+    VERSION_3_0("3-0", "bAAMD"),
+    VERSION_3_4("3-4", "bAAME"),
+    VERSION_3_5("3-5", "bAAMG"),
+    VERSION_3_7("3-7", "bAAMI");
     
     private static final HashSet<FlagVersion> triedVersions = new HashSet<>();
     private final List<Flag> flagSpec;
     private final Map<String, Flag> namesToFlags;
     private final Map<Flag, Integer> naturalOrder;
+    private final String binaryVersion;
     
     private static final Logger LOG = LoggerFactory.getLogger(FlagVersion.class);
     
     public static final String latest = "0.3.8";
     public static final String earliest = "0.3.0";
     
-    private FlagVersion(String filename) {
+    private FlagVersion(String filename, String binaryVersion) {
         String filePath = "fe/flagVersions/" + filename + ".csv";
         List<Flag> flags = new ArrayList<>();
         List<RecordParser> recordList = new ArrayList<>();
@@ -75,6 +76,11 @@ public enum FlagVersion {
             order.put(iter.next(), index++);
         }
         naturalOrder = Collections.unmodifiableMap(order);
+        this.binaryVersion = binaryVersion;
+    }
+     
+   public String getBinaryFlagVersion() {
+        return binaryVersion;
     }
     
     int compare(Flag a, Flag b) {
