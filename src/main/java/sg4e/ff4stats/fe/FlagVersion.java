@@ -46,7 +46,7 @@ public enum FlagVersion {
     
     private static final Logger LOG = LoggerFactory.getLogger(FlagVersion.class);
     
-    public static final String latest = "0.3.7";
+    public static final String latest = "0.3.8";
     public static final String earliest = "0.3.0";
     
     private FlagVersion(String filename) {
@@ -136,6 +136,7 @@ public enum FlagVersion {
         switch(version) {
             default:
                 LOG.warn("Unrecognized flag version {}; using latest", version);
+            case "0.3.8":
             case "0.3.7":
                 return VERSION_3_7;
             case "0.3.6":
