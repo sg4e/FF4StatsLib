@@ -39,10 +39,10 @@ import java.util.stream.Collectors;
 public class FlagSet {
     
     private final static Pattern BINARY_FLAGSET_PATTERN = Pattern.compile(
-            "b(?<version>[A-Za-z0-9_\\-]{4})" + // Version
+            "(?<binary>b(?<version>[A-Za-z0-9_\\-]{4})" + // Version
             "(?<flags>[A-Za-z0-9_\\-]*)" +      // Flags
             "(?:\\.(?<seed>[A-Z0-9]{1,10})" +   // Seed
-            "(?:\\.test\\.[0-9a-f]{8})?)?");    // Handler for test seeds
+            "(?:\\.test\\.[0-9a-f]{8})?)?)");    // Handler for test seeds
     
     private final TreeSet<Flag> flags = new TreeSet<>();
     private String version, binary;
@@ -139,6 +139,10 @@ public class FlagSet {
         return "http://ff4fe.com/make?flags=" + toString().replaceAll(" ", "+");
     }
     
+    private static int ubyte(int value) {
+        return (value < 0) ? (value + 256) : value;
+    }
+    
     public static FlagSet from(String string) {
         if(BINARY_FLAGSET_PATTERN.matcher(string).find())
            return fromBinary(string);
@@ -219,8 +223,11 @@ public class FlagSet {
             }
         }
         
+        int maxOffset = -1;
         for (String part : flagStrings) {
             Flag flag = version.getFlagByName(part);
+            if(maxOffset < (flag.getOffset() + (flag.getSize() - 1)))
+                maxOffset = flag.getOffset() + (flag.getSize() - 1);
             if(flag == null) {
                 incompatibleFlags.add(part);
                 throw new IllegalArgumentException("Error: Incompatible flags specified: " + String.join(", ", incompatibleFlags));
@@ -228,6 +235,29 @@ public class FlagSet {
             flagSet.add(flag);
         }
         flagSet.setReadableString(flagSet.sorted());
+        
+        maxOffset >>= 3;
+        byte[] flagStringDecoded = new byte[maxOffset+1];
+        flagSet.getFlags().forEach(f -> {
+           //int decodedValue = 0;
+           int lowByteIndex = f.getOffset() >> 3;
+           if(lowByteIndex < flagStringDecoded.length) {
+                int lowByteShift = f.getOffset() & 7;
+                flagStringDecoded[lowByteIndex] |= (f.getValue() << lowByteShift) & 0xFF;
+                //decodedValue = ubyte(flagStringDecoded[lowByteIndex]) >> lowByteShift;
+                int numOverflowBytes = ((f.getSize() - 1) >> 3) + 1;
+                for(int i = 1; i <= numOverflowBytes; i++) {
+                    if(lowByteIndex + i >= flagStringDecoded.length)
+                        break;
+                    flagStringDecoded[lowByteIndex + i] |= (f.getValue() >> (8 * i - lowByteShift));
+                    //decodedValue |= ubyte(flagStringDecoded[lowByteIndex + i]) << (8 * i - lowByteShift);
+                }
+                //int mask = (1 << f.getSize()) - 1;
+                //decodedValue &= mask;
+            }
+        });
+        String binaryFlagString = Base64.getUrlEncoder().encodeToString(flagStringDecoded);
+        flagSet.setBinary(version.getBinaryFlagVersion() + binaryFlagString.replace("=", ""));
         
         return flagSet;
     }
@@ -238,14 +268,13 @@ public class FlagSet {
         
         if(!matcher.find())
             throw new IllegalArgumentException("Not a binary flag string");
-        String cleaned = binary.trim().substring(1);
         //next 4 chars encode version
         byte[] versionBytes = Base64.getUrlDecoder().decode(matcher.group("version"));
         int[] versionInts = new int[versionBytes.length];
         for(int i = 0; i < versionBytes.length; i++)
             versionInts[i] = (int) versionBytes[i];
         FlagSet flagSet = new FlagSet();
-        flagSet.setBinary(binary);
+        flagSet.setBinary(matcher.group("binary"));
         flagSet.setVersion(Arrays.stream(versionInts).mapToObj(Integer::toString).collect(Collectors.joining(".")));
         //next is {flags}.{seed}        
         byte[] flagStringDecoded = Base64.getUrlDecoder().decode(matcher.group("flags"));
@@ -256,12 +285,12 @@ public class FlagSet {
             int lowByteIndex = f.getOffset() >> 3;
             if(lowByteIndex < flagStringDecoded.length) {
                 int lowByteShift = f.getOffset() & 7;
-                decodedValue = flagStringDecoded[lowByteIndex] >> lowByteShift;
+                decodedValue = ubyte(flagStringDecoded[lowByteIndex]) >> lowByteShift;
                 int numOverflowBytes = ((f.getSize() - 1) >> 3) + 1;
                 for(int i = 1; i <= numOverflowBytes; i++) {
                     if(lowByteIndex + i >= flagStringDecoded.length)
                         break;
-                    decodedValue |= flagStringDecoded[lowByteIndex + i] << (8 * i - lowByteShift);
+                    decodedValue |= ubyte(flagStringDecoded[lowByteIndex + i]) << (8 * i - lowByteShift);
                 }
                 int mask = (1 << f.getSize()) - 1;
                 decodedValue &= mask;

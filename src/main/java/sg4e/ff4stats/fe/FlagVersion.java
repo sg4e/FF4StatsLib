@@ -34,22 +34,23 @@ import sg4e.ff4stats.csv.*;
  * @author sg4e
  */
 public enum FlagVersion {
-    VERSION_3_0("3-0"),
-    VERSION_3_4("3-4"),
-    VERSION_3_5("3-5"),
-    VERSION_3_7("3-7");
+    VERSION_3_0("3-0", "bAAMD"),
+    VERSION_3_4("3-4", "bAAME"),
+    VERSION_3_5("3-5", "bAAMG"),
+    VERSION_3_7("3-7", "bAAMI");
     
     private static final HashSet<FlagVersion> triedVersions = new HashSet<>();
     private final List<Flag> flagSpec;
     private final Map<String, Flag> namesToFlags;
     private final Map<Flag, Integer> naturalOrder;
+    private final String binaryVersion;
     
     private static final Logger LOG = LoggerFactory.getLogger(FlagVersion.class);
     
-    public static final String latest = "0.3.7";
+    public static final String latest = "0.3.8";
     public static final String earliest = "0.3.0";
     
-    private FlagVersion(String filename) {
+    private FlagVersion(String filename, String binaryVersion) {
         String filePath = "fe/flagVersions/" + filename + ".csv";
         List<Flag> flags = new ArrayList<>();
         List<RecordParser> recordList = new ArrayList<>();
@@ -75,6 +76,11 @@ public enum FlagVersion {
             order.put(iter.next(), index++);
         }
         naturalOrder = Collections.unmodifiableMap(order);
+        this.binaryVersion = binaryVersion;
+    }
+     
+   public String getBinaryFlagVersion() {
+        return binaryVersion;
     }
     
     int compare(Flag a, Flag b) {
@@ -88,19 +94,6 @@ public enum FlagVersion {
     public Flag getFlagByName(String name) {
         return namesToFlags.get(name);
     }
-    
-    /**
-     * Returns the FlagVersion associated with the provided version string. If
-     * the version is unrecognized/unsupported, the latest FlagVersion is
-     * returned. This behavior allows for the library to support future versions
-     * that do not alter the flag specification without needing recoding;
-     * however, newer flag specification that are not yet supported will cause
-     * errors elsewhere.
-     * 
-     * @param version the version string decoded from the FF4FE binary flag
-     * representation
-     * @return 
-     */
     
     public static Flag getFlagFromFlagString(FlagVersion version, String flag, Flag previousFlag) {        
         for(Flag f : version.getAllFlags()) {
@@ -132,10 +125,24 @@ public enum FlagVersion {
         return null;
     }
     
+    /**
+     * Returns the FlagVersion associated with the provided version string. If
+     * the version is unrecognized/unsupported, the latest FlagVersion is
+     * returned. This behavior allows for the library to support future versions
+     * that do not alter the flag specification without needing recoding;
+     * however, newer flag specification that are not yet supported will cause
+     * errors elsewhere.
+     * 
+     * @param version the version string decoded from the FF4FE binary flag
+     * representation
+     * @return 
+     */
+    
     public static FlagVersion getFromVersionString(String version) {
         switch(version) {
             default:
                 LOG.warn("Unrecognized flag version {}; using latest", version);
+            case "0.3.8":
             case "0.3.7":
                 return VERSION_3_7;
             case "0.3.6":
