@@ -192,7 +192,7 @@ public class FlagSet {
         
         FlagVersion version = FlagVersion.getFromVersionString(FlagVersion.latest);        
         
-        String[] parts = text.split(" ");
+        String[] parts = text.split("\\s+");
         List<Flag> allFlags = version.getAllFlags();
         FlagSet flagSet = new FlagSet();
         HashSet<String> flagStrings = new HashSet<>();
