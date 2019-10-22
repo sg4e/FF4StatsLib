@@ -31,6 +31,8 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -48,6 +50,7 @@ public class FlagSet {
     private String version, binary;
     private String seed = "";
     private String readableString = "uninitialized";
+    private static final Logger LOG = LoggerFactory.getLogger(FlagSet.class); 
     
     private FlagSet() {
         
@@ -101,12 +104,19 @@ public class FlagSet {
     
     private String sorted() {
         //make string representation
+        String seperator = FlagVersion.getFromVersionString(getVersion()).getSeperator();
         StringBuilder s = new StringBuilder();
         String lastFlag = "";
         for(Flag f : getFlags()) {
             String currentFlag = f.getName();
             char first = currentFlag.charAt(0);
-            if(first != '-' && lastFlag.startsWith(first + "")) {
+            String[] split = currentFlag.split(":");
+            if (split.length == 2 && lastFlag.startsWith(split[0])) {
+                s.append(",");
+                s.append(split[1]);
+            }            
+            else if(first != '-' && lastFlag.startsWith(first + "")) {
+                s.append(seperator);
                 s.append(currentFlag.substring(1));
             }
             else {
@@ -200,14 +210,26 @@ public class FlagSet {
         
         for(String part : parts) {
             Flag previousFlag = null;
-            while(part.length() > 0) {
-                Flag flag = FlagVersion.getFlagFromFlagString(version, part, previousFlag);
+            while(part.length() > 0) {                
+                LOG.debug("-----\nOriginal part: " + part);
+                try {
+                    if (part.substring(1,2).equals("/")) {
+                        part = part.substring(0,1) + part.substring(2);
+                        LOG.debug("Updated part: " + part);
+                    }               
+                }
+                catch (Exception ex) {
+                    LOG.error("Failed to update part due to exception: " + ex.getMessage());
+                }
+                
+                Flag flag = FlagVersion.getFlagFromFlagString(version, part.split(",")[0], previousFlag);
+                
                 if(flag == null) {
                     version = FlagVersion.getVersionFromFlagString(part);
                     previousFlag = null;
                     if(version == null)
                         throw new IllegalArgumentException("Error: Unrecognized flag: " + part);
-                    flag = FlagVersion.getFlagFromFlagString(version, part, previousFlag);
+                    flag = FlagVersion.getFlagFromFlagString(version, part.split(",")[0], previousFlag);
                     incompatibleFlags.add(flag.getName());
                 }
                 flagStrings.add(flag.getName());
@@ -216,10 +238,16 @@ public class FlagSet {
                 if(part.equals(flag.getName()))
                     part = "";
                 else {
-                    if(part.startsWith("-"))
+                    if(part.startsWith("-") && part.split(",").length == 1)
                         throw new IllegalArgumentException("Error: Unrecognized flag: " + part);
                     part = part.substring(0,1) + part.substring(flag.getName().length());
                 }
+                try {
+                    if(part.substring(1,2).equals(",")) {
+                        part = flag.getName().split(":")[0] + ":" + part.substring(2);
+                    }
+                }
+                catch (Exception ex) {}
             }
         }
         
@@ -234,6 +262,7 @@ public class FlagSet {
             }
             flagSet.add(flag);
         }
+        flagSet.setVersion(version.getVersion());
         flagSet.setReadableString(flagSet.sorted());
         
         maxOffset >>= 3;
