@@ -31,6 +31,8 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -48,6 +50,7 @@ public class FlagSet {
     private String version, binary;
     private String seed = "";
     private String readableString = "uninitialized";
+    private static final Logger LOG = LoggerFactory.getLogger(FlagSet.class); 
     
     private FlagSet() {
         
@@ -208,16 +211,15 @@ public class FlagSet {
         for(String part : parts) {
             Flag previousFlag = null;
             while(part.length() > 0) {                
-                System.out.println("-----\nOriginal part: " + part);
+                LOG.debug("-----\nOriginal part: " + part);
                 try {
                     if (part.substring(1,2).equals("/")) {
                         part = part.substring(0,1) + part.substring(2);
-                        System.out.println("Updated part: " + part);
+                        LOG.debug("Updated part: " + part);
                     }               
                 }
                 catch (Exception ex) {
-                    System.out.println("Failed to update part due to exception: " + ex.getMessage());
-                    
+                    LOG.error("Failed to update part due to exception: " + ex.getMessage());
                 }
                 
                 Flag flag = FlagVersion.getFlagFromFlagString(version, part.split(",")[0], previousFlag);
