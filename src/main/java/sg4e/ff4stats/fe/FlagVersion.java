@@ -18,6 +18,8 @@ package sg4e.ff4stats.fe;
 
 import com.google.common.base.Functions;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,23 +36,25 @@ import sg4e.ff4stats.csv.*;
  * @author sg4e
  */
 public enum FlagVersion {
-    VERSION_3_0("3-0", "bAAMD"),
-    VERSION_3_4("3-4", "bAAME"),
-    VERSION_3_5("3-5", "bAAMG"),
-    VERSION_3_7("3-7", "bAAMI");
+    VERSION_3_0("3-0", "bAAMD",""),
+    VERSION_3_4("3-4", "bAAME",""),
+    VERSION_3_5("3-5", "bAAMG",""),
+    VERSION_3_7("3-7", "bAAMI",""),
+    VERSION_4_0_0("4-0-0", "bBAAA","/");
     
     private static final HashSet<FlagVersion> triedVersions = new HashSet<>();
     private final List<Flag> flagSpec;
     private final Map<String, Flag> namesToFlags;
     private final Map<Flag, Integer> naturalOrder;
     private final String binaryVersion;
+    private final String seperator;
     
     private static final Logger LOG = LoggerFactory.getLogger(FlagVersion.class);
     
-    public static final String latest = "0.3.8";
+    public static final String latest = "4.0.0";
     public static final String earliest = "0.3.0";
     
-    private FlagVersion(String filename, String binaryVersion) {
+    private FlagVersion(String filename, String binaryVersion, String seperator) {
         String filePath = "fe/flagVersions/" + filename + ".csv";
         List<Flag> flags = new ArrayList<>();
         List<RecordParser> recordList = new ArrayList<>();
@@ -77,6 +81,11 @@ public enum FlagVersion {
         }
         naturalOrder = Collections.unmodifiableMap(order);
         this.binaryVersion = binaryVersion;
+        this.seperator = seperator;
+    }
+    
+    public String getSeperator() {
+        return seperator;
     }
      
    public String getBinaryFlagVersion() {
@@ -93,6 +102,14 @@ public enum FlagVersion {
     
     public Flag getFlagByName(String name) {
         return namesToFlags.get(name);
+    }
+    
+    public String getVersion() {
+        byte[] versionBytes = Base64.getUrlDecoder().decode(binaryVersion.substring(1));
+        int[] versionInts = new int[versionBytes.length];
+        for(int i = 0; i < versionBytes.length; i++)
+            versionInts[i] = (int) versionBytes[i];
+        return Arrays.stream(versionInts).mapToObj(Integer::toString).collect(Collectors.joining("."));
     }
     
     public static Flag getFlagFromFlagString(FlagVersion version, String flag, Flag previousFlag) {        
@@ -112,6 +129,8 @@ public enum FlagVersion {
     }
     
     public static FlagVersion getVersionFromFlagString(String flag) {
+        if(getFlagFromFlagString(VERSION_4_0_0, flag, null) != null && !triedVersions.contains(VERSION_4_0_0))
+            return VERSION_4_0_0;
         if(getFlagFromFlagString(VERSION_3_7, flag, null) != null && !triedVersions.contains(VERSION_3_7))
             return VERSION_3_7;
         if(getFlagFromFlagString(VERSION_3_5, flag, null) != null && !triedVersions.contains(VERSION_3_5))
@@ -142,6 +161,8 @@ public enum FlagVersion {
         switch(version) {
             default:
                 LOG.warn("Unrecognized flag version {}; using latest", version);
+            case "4.0.0":
+                return VERSION_4_0_0;
             case "0.3.8":
             case "0.3.7":
                 return VERSION_3_7;
