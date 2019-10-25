@@ -84,13 +84,24 @@ public class FlagSet {
         this.binary = binary;
     }
     
-    private void add(Flag flag) {
-        flags.forEach(f -> {
-            if(flag.getOffset() == f.getOffset() && flag.getValue() != f.getValue()) {
-                throw new IllegalArgumentException("Error: Flag " + flag.getName() + " conflicts with already-set flag " + f.getName());
+    protected void add(Flag flag) {
+        List<Flag> baseFlags = flag.getVersion().getFlagRules().GetBaseFlags();
+        List<Flag> remove = new ArrayList<>();
+        flags.forEach(f -> {            
+            if(flag.getOffset() == f.getOffset() && flag.getValue() != f.getValue() && !baseFlags.contains(f)) {
+                remove.add(f);
+                //throw new IllegalArgumentException("Error: Flag " + flag.getName() + " conflicts with already-set flag " + f.getName());
+            }
+            else if (flag.getOffset() == f.getOffset() && baseFlags.contains(f)) {
+                remove.add(f);
             }
         });
+        remove.forEach(f -> flags.remove(f));
         flags.add(flag);
+    }
+    
+    protected void remove(Flag flag) {
+        flags.remove(flag);
     }
 
     private void setReadableString(String readableString) {
@@ -104,7 +115,6 @@ public class FlagSet {
     
     private String sorted() {
         //make string representation
-        String seperator = FlagVersion.getFromVersionString(getVersion()).getSeperator();
         StringBuilder s = new StringBuilder();
         String lastFlag = "";
         for(Flag f : getFlags()) {
@@ -116,7 +126,7 @@ public class FlagSet {
                 s.append(split[1]);
             }            
             else if(first != '-' && lastFlag.startsWith(first + "")) {
-                s.append(seperator);
+                s.append(f.getVersion().getSeperator());
                 s.append(currentFlag.substring(1));
             }
             else {
@@ -216,7 +226,10 @@ public class FlagSet {
                     if (part.substring(1,2).equals("/")) {
                         part = part.substring(0,1) + part.substring(2);
                         LOG.debug("Updated part: " + part);
-                    }               
+                    }
+                    while (part.substring(0,1).equals(part.substring(1,2))) {
+                        part = part.substring(0,1) + part.substring(2);
+                    }
                 }
                 catch (Exception ex) {
                     LOG.error("Failed to update part due to exception: " + ex.getMessage());
@@ -252,6 +265,8 @@ public class FlagSet {
         }
         
         int maxOffset = -1;
+        FlagRules flagRules = version.getFlagRules();
+        flagRules.ApplyRules(flagSet, null);
         for (String part : flagStrings) {
             Flag flag = version.getFlagByName(part);
             if(maxOffset < (flag.getOffset() + (flag.getSize() - 1)))
@@ -261,6 +276,7 @@ public class FlagSet {
                 throw new IllegalArgumentException("Error: Incompatible flags specified: " + String.join(", ", incompatibleFlags));
             }
             flagSet.add(flag);
+            flagRules.ApplyRules(flagSet, flag);
         }
         flagSet.setVersion(version.getVersion());
         flagSet.setReadableString(flagSet.sorted());
