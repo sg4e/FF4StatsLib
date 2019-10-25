@@ -88,7 +88,7 @@ public enum FlagVersion {
         FlagSet flagset;
         try {
             if(parser != null) {
-                fr.ParseJson(this, parser);
+                fr.parseJson(this, parser);
             }            
         }
         catch (Exception ex) {

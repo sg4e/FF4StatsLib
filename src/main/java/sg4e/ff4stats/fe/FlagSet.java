@@ -89,7 +89,7 @@ public class FlagSet {
     }
     
     protected void add(Flag flag) {
-        List<Flag> baseFlags = flag.getVersion().getFlagRules().GetBaseFlags();
+        List<Flag> baseFlags = flag.getVersion().getFlagRules().getBaseFlags();
         List<Flag> remove = new ArrayList<>();
         flags.forEach(f -> {            
             if(flag.getOffset() == f.getOffset() && flag.getValue() != f.getValue() && !baseFlags.contains(f)) {
@@ -270,7 +270,7 @@ public class FlagSet {
         
         int maxOffset = -1;
         FlagRules flagRules = version.getFlagRules();
-        flagRules.ApplyRules(flagSet, null);
+        flagRules.applyRules(flagSet, null);
         for (String part : flagStrings) {
             Flag flag = version.getFlagByName(part);
             if(maxOffset < (flag.getOffset() + (flag.getSize() - 1)))
@@ -280,7 +280,7 @@ public class FlagSet {
                 throw new IllegalArgumentException("Error: Incompatible flags specified: " + String.join(", ", incompatibleFlags));
             }
             flagSet.add(flag);
-            flagRules.ApplyRules(flagSet, flag);
+            flagRules.applyRules(flagSet, flag);
         }
         flagSet.setVersion(version.getVersion());
         flagSet.setReadableString(flagSet.sorted());

@@ -18,8 +18,8 @@ import java.util.List;
  */
 public class FlagRules {
     
-    private final HashMap<Flag, List<String>> RuleReference = new HashMap<>();
-    private final HashMap<String, Rule> Rules = new HashMap<>();
+    private final HashMap<Flag, List<String>> ruleReference = new HashMap<>();
+    private final HashMap<String, Rule> rules = new HashMap<>();
     
     private static enum OPERATOR {
         AND, OR, NOT, DEFAULT
@@ -99,7 +99,7 @@ public class FlagRules {
             }
         }
         
-        public void ParseJson(JsonParser parser) throws IOException {
+        public void parseJson(JsonParser parser) throws IOException {
             parser.nextToken();
             switch(parser.getValueAsString()) {
                 case "and":
@@ -118,7 +118,7 @@ public class FlagRules {
                 }
                 else {
                     Conditions c = new Conditions();
-                    c.ParseJson(parser);
+                    c.parseJson(parser);
                     conditions.add(c);
                 }
             }
@@ -163,14 +163,14 @@ public class FlagRules {
             consequences.forEach(consequence -> consequence.applyConsequences(flags));
         }
         
-        public void ParseJson(FlagVersion version, JsonParser parser) throws IOException {
+        public void parseJson(FlagVersion version, JsonParser parser) throws IOException {
             while (!"condition".equals(parser.getCurrentName()))
                 parser.nextToken();
             if(JsonToken.VALUE_STRING.equals(parser.nextToken())) {
                 conditions.conditions.add(parser.getValueAsString());
             }
             else {
-                conditions.ParseJson(parser);
+                conditions.parseJson(parser);
             }
             
             while (!JsonToken.START_OBJECT.equals(parser.nextToken()) || !"consequences".equals(parser.getCurrentName())) {}
@@ -190,27 +190,27 @@ public class FlagRules {
         }
     }
     
-    protected List<Flag> GetBaseFlags() {
+    protected List<Flag> getBaseFlags() {
         List<Flag> flags = new ArrayList<>();
-        Rules.forEach((str, rule) -> {
+        rules.forEach((str, rule) -> {
             rule.applyRule(flags);
         });
         return flags;
     }
     
-    protected void ApplyRules(FlagSet flagset, Flag flag) {
+    protected void applyRules(FlagSet flagset, Flag flag) {
         if(flag == null)
         {
-            Rules.forEach((str, rule) -> {rule.applyRule(flagset);});
+            rules.forEach((str, rule) -> {rule.applyRule(flagset);});
         }
         else {
-            if(RuleReference.get(flag) == null) return;
-            RuleReference.get(flag).forEach(rule -> {
-                Rules.get(rule).applyRule(flagset);});
+            if(ruleReference.get(flag) == null) return;
+            ruleReference.get(flag).forEach(rule -> {
+                rules.get(rule).applyRule(flagset);});
         }
     }
     
-    protected void ParseJson(FlagVersion version, JsonParser parser) throws IOException {
+    protected void parseJson(FlagVersion version, JsonParser parser) throws IOException {
         while (!JsonToken.START_OBJECT.equals(parser.nextToken()) || !"rules".equals(parser.getCurrentName())) {
             //if(parser.currentToken() == null) throw new IOException("Unexpected end of stream while looking for rules");
         }
@@ -218,8 +218,8 @@ public class FlagRules {
         while(!JsonToken.END_OBJECT.equals(parser.nextToken())) {
             String name = parser.getCurrentName();
             Rule rule = new Rule();
-            rule.ParseJson(version, parser);
-            Rules.put(name, rule);
+            rule.parseJson(version, parser);
+            rules.put(name, rule);
         }
         
         while (!JsonToken.START_OBJECT.equals(parser.nextToken()) || !"rule_references".equals(parser.getCurrentName())) {
@@ -234,7 +234,7 @@ public class FlagRules {
                 refs.add(parser.getValueAsString());
             }
             Flag flag = version.getFlagByName(name);
-            RuleReference.put(flag, refs);
+            ruleReference.put(flag, refs);
         }
     }
 }
