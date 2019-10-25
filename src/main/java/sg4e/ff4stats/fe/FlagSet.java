@@ -84,6 +84,10 @@ public class FlagSet {
         this.binary = binary;
     }
     
+    protected void rawAdd(Flag flag) {
+        flags.add(flag);
+    }
+    
     protected void add(Flag flag) {
         List<Flag> baseFlags = flag.getVersion().getFlagRules().GetBaseFlags();
         List<Flag> remove = new ArrayList<>();
@@ -215,7 +219,7 @@ public class FlagSet {
         String[] parts = text.split("\\s+");
         List<Flag> allFlags = version.getAllFlags();
         FlagSet flagSet = new FlagSet();
-        HashSet<String> flagStrings = new HashSet<>();
+        List<String> flagStrings = new ArrayList<>();
         HashSet<String> incompatibleFlags = new HashSet<>();
         
         for(String part : parts) {

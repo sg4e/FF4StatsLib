@@ -133,7 +133,7 @@ public class FlagRules {
         public void applyConsequences(FlagSet flagset) {
             for(int i = 0; i < consequences.size(); i++) {
                 if(enable)
-                    flagset.add(consequences.get(i));
+                    flagset.rawAdd(consequences.get(i));
                 else
                     flagset.remove(consequences.get(i));
             }
