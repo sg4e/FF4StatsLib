@@ -104,6 +104,8 @@ public enum FlagVersion {
         List<RecordParser> recordList = new ArrayList<>();
         try {
             recordList = new CSVParser(filePath).Records;
+            if(recordList == null)
+                return null;
         }
         catch(Exception ex) {
             log.error("Error loading flag spec data from " + filePath, ex);
