@@ -775,10 +775,10 @@
         "Cpermadeader",
         "Tvanilla",
         "Tshuffle",
+        "Tstandard",
         "Tpro",
-        "Tboosted",
-        "Trelaxed",
         "Twild",
+        "Twildish",
         "Tempty",
         "Tsparse:10",
         "Tsparse:20",
@@ -793,9 +793,8 @@
         "Tjunk",
         "Svanilla",
         "Sshuffle",
+        "Sstandard",
         "Spro",
-        "Sboosted",
-        "Srelaxed",
         "Swild",
         "Scabins",
         "Sempty",
@@ -824,6 +823,8 @@
         "Edanger",
         "Ecantrun",
         "Enoexp",
+        "Eno:jdrops",
+        "Eno:sirens",
         "Gnone",
         "Gdupe",
         "Gmp",
@@ -1606,10 +1607,10 @@
         [
             "Tvanilla",
             "Tshuffle",
+            "Tstandard",
             "Tpro",
-            "Tboosted",
-            "Trelaxed",
             "Twild",
+            "Twildish",
             "Tempty"
         ],
         [
@@ -1626,9 +1627,8 @@
         [
             "Svanilla",
             "Sshuffle",
+            "Sstandard",
             "Spro",
-            "Sboosted",
-            "Srelaxed",
             "Swild",
             "Scabins",
             "Sempty"
@@ -1646,6 +1646,10 @@
             "Etoggle",
             "Ereduce",
             "Enoencounters"
+        ],
+        [
+            "Eno:jdrops",
+            "Eno:sirens"
         ],
         [
             "-kit:basic",
@@ -6277,25 +6281,25 @@
             "value": 2
         },
         {
-            "flag": "Tpro",
+            "flag": "Tstandard",
             "offset": 118,
             "size": 3,
             "value": 3
         },
         {
-            "flag": "Tboosted",
+            "flag": "Tpro",
             "offset": 118,
             "size": 3,
             "value": 4
         },
         {
-            "flag": "Trelaxed",
+            "flag": "Twild",
             "offset": 118,
             "size": 3,
             "value": 5
         },
         {
-            "flag": "Twild",
+            "flag": "Twildish",
             "offset": 118,
             "size": 3,
             "value": 6
@@ -6375,330 +6379,336 @@
         {
             "flag": "Svanilla",
             "offset": 127,
-            "size": 4,
+            "size": 3,
             "value": 1
         },
         {
             "flag": "Sshuffle",
             "offset": 127,
-            "size": 4,
+            "size": 3,
             "value": 2
+        },
+        {
+            "flag": "Sstandard",
+            "offset": 127,
+            "size": 3,
+            "value": 3
         },
         {
             "flag": "Spro",
             "offset": 127,
-            "size": 4,
-            "value": 3
-        },
-        {
-            "flag": "Sboosted",
-            "offset": 127,
-            "size": 4,
+            "size": 3,
             "value": 4
-        },
-        {
-            "flag": "Srelaxed",
-            "offset": 127,
-            "size": 4,
-            "value": 5
         },
         {
             "flag": "Swild",
             "offset": 127,
-            "size": 4,
-            "value": 6
+            "size": 3,
+            "value": 5
         },
         {
             "flag": "Scabins",
             "offset": 127,
-            "size": 4,
-            "value": 7
+            "size": 3,
+            "value": 6
         },
         {
             "flag": "Sempty",
             "offset": 127,
-            "size": 4,
-            "value": 8
+            "size": 3,
+            "value": 7
         },
         {
             "flag": "Sfree",
-            "offset": 131,
+            "offset": 130,
             "size": 1,
             "value": 1
         },
         {
             "flag": "Squarter",
-            "offset": 132,
+            "offset": 131,
             "size": 1,
             "value": 1
         },
         {
             "flag": "Sno:j",
-            "offset": 133,
+            "offset": 132,
             "size": 1,
             "value": 1
         },
         {
             "flag": "Sno:apples",
-            "offset": 134,
+            "offset": 133,
             "size": 1,
             "value": 1
         },
         {
             "flag": "Sno:sirens",
-            "offset": 135,
+            "offset": 134,
             "size": 1,
             "value": 1
         },
         {
             "flag": "Sunsafe",
-            "offset": 136,
+            "offset": 135,
             "size": 1,
             "value": 1
         },
         {
             "flag": "Bvanilla",
-            "offset": 137,
+            "offset": 136,
             "size": 2,
             "value": 1
         },
         {
             "flag": "Bstandard",
-            "offset": 137,
+            "offset": 136,
             "size": 2,
             "value": 2
         },
         {
             "flag": "Bunsafe",
-            "offset": 139,
+            "offset": 138,
             "size": 1,
             "value": 1
         },
         {
             "flag": "Balt:gauntlet",
-            "offset": 140,
+            "offset": 139,
             "size": 1,
             "value": 1
         },
         {
             "flag": "Bwhyburn",
-            "offset": 141,
+            "offset": 140,
             "size": 2,
             "value": 1
         },
         {
             "flag": "Bwhichburn",
-            "offset": 141,
+            "offset": 140,
             "size": 2,
             "value": 2
         },
         {
             "flag": "Nnone",
-            "offset": 143,
+            "offset": 142,
             "size": 1,
             "value": 1
         },
         {
             "flag": "Nchars",
-            "offset": 144,
+            "offset": 143,
             "size": 1,
             "value": 1
         },
         {
             "flag": "Nkey",
-            "offset": 145,
+            "offset": 144,
             "size": 1,
             "value": 1
         },
         {
             "flag": "Nbosses",
-            "offset": 146,
+            "offset": 145,
             "size": 1,
             "value": 1
         },
         {
             "flag": "Evanilla",
-            "offset": 147,
+            "offset": 146,
             "size": 3,
             "value": 1
         },
         {
             "flag": "Etoggle",
-            "offset": 147,
+            "offset": 146,
             "size": 3,
             "value": 2
         },
         {
             "flag": "Ereduce",
-            "offset": 147,
+            "offset": 146,
             "size": 3,
             "value": 3
         },
         {
             "flag": "Enoencounters",
-            "offset": 147,
+            "offset": 146,
             "size": 3,
             "value": 4
         },
         {
             "flag": "Ekeep:doors",
-            "offset": 150,
+            "offset": 149,
             "size": 1,
             "value": 1
         },
         {
             "flag": "Ekeep:behemoths",
-            "offset": 151,
+            "offset": 150,
             "size": 1,
             "value": 1
         },
         {
             "flag": "Edanger",
-            "offset": 152,
+            "offset": 151,
             "size": 1,
             "value": 1
         },
         {
             "flag": "Ecantrun",
-            "offset": 153,
+            "offset": 152,
             "size": 1,
             "value": 1
         },
         {
             "flag": "Enoexp",
-            "offset": 154,
+            "offset": 153,
             "size": 1,
             "value": 1
+        },
+        {
+            "flag": "Eno:jdrops",
+            "offset": 154,
+            "size": 2,
+            "value": 1
+        },
+        {
+            "flag": "Eno:sirens",
+            "offset": 154,
+            "size": 2,
+            "value": 2
         },
         {
             "flag": "Gnone",
-            "offset": 155,
-            "size": 1,
-            "value": 1
-        },
-        {
-            "flag": "Gdupe",
             "offset": 156,
             "size": 1,
             "value": 1
         },
         {
-            "flag": "Gmp",
+            "flag": "Gdupe",
             "offset": 157,
             "size": 1,
             "value": 1
         },
         {
-            "flag": "Gwarp",
+            "flag": "Gmp",
             "offset": 158,
             "size": 1,
             "value": 1
         },
         {
-            "flag": "Glife",
+            "flag": "Gwarp",
             "offset": 159,
             "size": 1,
             "value": 1
         },
         {
-            "flag": "G64",
+            "flag": "Glife",
             "offset": 160,
             "size": 1,
             "value": 1
         },
         {
-            "flag": "-kit:basic",
+            "flag": "G64",
             "offset": 161,
+            "size": 1,
+            "value": 1
+        },
+        {
+            "flag": "-kit:basic",
+            "offset": 162,
             "size": 3,
             "value": 1
         },
         {
             "flag": "-kit:better",
-            "offset": 161,
+            "offset": 162,
             "size": 3,
             "value": 2
         },
         {
             "flag": "-kit:minimal",
-            "offset": 161,
+            "offset": 162,
             "size": 3,
             "value": 3
         },
         {
             "flag": "-kit:loaded",
-            "offset": 161,
+            "offset": 162,
             "size": 3,
             "value": 4
         },
         {
             "flag": "-kit:spitball",
-            "offset": 161,
+            "offset": 162,
             "size": 3,
             "value": 5
         },
         {
             "flag": "-noadamants",
-            "offset": 164,
-            "size": 1,
-            "value": 1
-        },
-        {
-            "flag": "-vintage",
             "offset": 165,
             "size": 1,
             "value": 1
         },
         {
-            "flag": "-spoon",
+            "flag": "-vintage",
             "offset": 166,
             "size": 1,
             "value": 1
         },
         {
-            "flag": "-vanilla:fusoya",
+            "flag": "-spoon",
             "offset": 167,
             "size": 1,
             "value": 1
         },
         {
-            "flag": "-vanilla:agility",
+            "flag": "-vanilla:fusoya",
             "offset": 168,
             "size": 1,
             "value": 1
         },
         {
-            "flag": "-vanilla:hobs",
+            "flag": "-vanilla:agility",
             "offset": 169,
             "size": 1,
             "value": 1
         },
         {
-            "flag": "-vanilla:exp",
+            "flag": "-vanilla:hobs",
             "offset": 170,
             "size": 1,
             "value": 1
         },
         {
-            "flag": "-vanilla:fashion",
+            "flag": "-vanilla:exp",
             "offset": 171,
             "size": 1,
             "value": 1
         },
         {
-            "flag": "-vanilla:traps",
+            "flag": "-vanilla:fashion",
             "offset": 172,
             "size": 1,
             "value": 1
         },
         {
-            "flag": "-vanilla:z",
+            "flag": "-vanilla:traps",
             "offset": 173,
             "size": 1,
             "value": 1
         },
         {
-            "flag": "-spoiler",
+            "flag": "-vanilla:z",
             "offset": 174,
+            "size": 1,
+            "value": 1
+        },
+        {
+            "flag": "-spoiler",
+            "offset": 175,
             "size": 1,
             "value": 1
         }
@@ -6759,10 +6769,10 @@
                     "or",
                     "Tvanilla",
                     "Tshuffle",
+                    "Tstandard",
                     "Tpro",
-                    "Tboosted",
-                    "Trelaxed",
                     "Twild",
+                    "Twildish",
                     "Tempty"
                 ]
             ],
@@ -6779,9 +6789,8 @@
                     "or",
                     "Svanilla",
                     "Sshuffle",
+                    "Sstandard",
                     "Spro",
-                    "Sboosted",
-                    "Srelaxed",
                     "Swild",
                     "Scabins",
                     "Sempty"
@@ -9392,9 +9401,6 @@
             "r3",
             "r21"
         ],
-        "Tboosted": [
-            "r4"
-        ],
         "Tempty": [
             "r4",
             "r24"
@@ -9402,12 +9408,12 @@
         "Tpro": [
             "r4"
         ],
-        "Trelaxed": [
-            "r4"
-        ],
         "Tshuffle": [
             "r4",
             "r24"
+        ],
+        "Tstandard": [
+            "r4"
         ],
         "Tvanilla": [
             "r4",
@@ -9416,8 +9422,8 @@
         "Twild": [
             "r4"
         ],
-        "Sboosted": [
-            "r5"
+        "Twildish": [
+            "r4"
         ],
         "Scabins": [
             "r5",
@@ -9430,10 +9436,10 @@
         "Spro": [
             "r5"
         ],
-        "Srelaxed": [
+        "Sshuffle": [
             "r5"
         ],
-        "Sshuffle": [
+        "Sstandard": [
             "r5"
         ],
         "Svanilla": [
