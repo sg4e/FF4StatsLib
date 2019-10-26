@@ -63,6 +63,8 @@ public enum KeyItemLocation {
     MIST("D Mist", "Mist", false),
     //V1
     KOKKOL("Kokkol's", "Kokkl", true, ADAMANT, KeyItem.LEGEND),
+    //Version 4 objective system
+    OBJECTIVE("Objectives", "Obj", false),
     //K0
     ZEROMUS("Zeromus", "Zmus", false);    
     
