@@ -35,13 +35,17 @@ public class CSVParser {
     public final List<RecordParser> Records;
     
     public CSVParser(String csvfile) throws IOException {        
-        List<CSVRecord> recordList = new ArrayList<>();
         List<RecordParser> recordParserList = new ArrayList<>();
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
         InputStream inputStream = classLoader.getResourceAsStream(csvfile);
-        Reader reader = new InputStreamReader(inputStream);
-        recordList = CSVFormat.RFC4180.withHeader().parse(reader).getRecords();
+        if (inputStream == null) {
+            Records = null;
+            return;
+        }
         
+        Reader reader = new InputStreamReader(inputStream);
+        
+        List<CSVRecord> recordList = CSVFormat.RFC4180.withHeader().parse(reader).getRecords();        
         recordList.forEach(record -> {recordParserList.add(new RecordParser(record));});        
         Records = Collections.unmodifiableList(recordParserList);
     }

@@ -16,7 +16,11 @@
  */
 package sg4e.ff4stats.fe;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.google.common.base.Functions;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -42,12 +46,15 @@ public enum FlagVersion {
     VERSION_3_7("3-7", "bAAMI",""),
     VERSION_4_0_0("4-0-0", "bBAAA","/");
     
+    private final Logger log = LoggerFactory.getLogger(FlagVersion.class);
     private static final HashSet<FlagVersion> triedVersions = new HashSet<>();
     private final List<Flag> flagSpec;
     private final Map<String, Flag> namesToFlags;
     private final Map<Flag, Integer> naturalOrder;
     private final String binaryVersion;
     private final String seperator;
+    private final FlagRules flagRules;
+    private JsonParser parser;
     
     private static final Logger LOG = LoggerFactory.getLogger(FlagVersion.class);
     
@@ -55,22 +62,18 @@ public enum FlagVersion {
     public static final String earliest = "0.3.0";
     
     private FlagVersion(String filename, String binaryVersion, String seperator) {
-        String filePath = "fe/flagVersions/" + filename + ".csv";
-        List<Flag> flags = new ArrayList<>();
-        List<RecordParser> recordList = new ArrayList<>();
-        try {
-            recordList = new CSVParser("fe/flagVersions/" + filename + ".csv").Records;
+        String filePath = "fe/flagVersions/" + filename;
+        List<Flag> flags = parseCSV(filename);
+        FlagRules fr = new FlagRules();
+        if(flags == null)
+        {
+            flags = parseJSON(filename);
+            if(flags == null) {
+                log.error("Could not find file: " + filename);
+                flags = new ArrayList<>();
+            }
         }
-        catch(Exception ex) {
-            //it's a compile-time error to call a non-constant static field in an enum's constructor
-            //if this logger becomes used more than just here, move to the outside of the try block
-            Logger log = LoggerFactory.getLogger(FlagVersion.class);
-            log.error("Error loading flag spec data from " + filePath, ex);
-        }
-        recordList.forEach(record -> {
-            flags.add(new Flag(record.getString(0), record.getInteger(1), 
-                    record.getInteger(2), record.getInteger(3), this));
-        });
+        
         flagSpec = Collections.unmodifiableList(flags);
         namesToFlags = Collections.unmodifiableMap(
                 flagSpec.stream().collect(Collectors.toMap(Flag::getName, Functions.identity())));
@@ -82,6 +85,89 @@ public enum FlagVersion {
         naturalOrder = Collections.unmodifiableMap(order);
         this.binaryVersion = binaryVersion;
         this.seperator = seperator;
+        FlagSet flagset;
+        try {
+            if(parser != null) {
+                fr.parseJson(this, parser);
+            }            
+        }
+        catch (Exception ex) {
+            log.error("Error parsing rules for " + filePath, ex);
+            fr = new FlagRules();
+        }
+        flagRules = fr;
+    }
+    
+    private List<Flag> parseCSV(String filename) {
+        String filePath = "fe/flagVersions/" + filename + ".csv";
+        List<Flag> flags = new ArrayList<>();
+        List<RecordParser> recordList = new ArrayList<>();
+        try {
+            recordList = new CSVParser(filePath).Records;
+            if(recordList == null)
+                return null;
+        }
+        catch(Exception ex) {
+            log.error("Error loading flag spec data from " + filePath, ex);
+            return null;
+        }
+        recordList.forEach(record -> {
+            flags.add(new Flag(record.getString(0), record.getInteger(1), 
+                    record.getInteger(2), record.getInteger(3), this));
+        });
+        return flags;
+    }
+    
+    private List<Flag> parseJSON(String filename) {
+        String filePath = "fe/flagVersions/" + filename + ".json"; 
+        List<Flag> flags = new ArrayList<>();
+        
+        try {
+            ClassLoader classLoader = getClass().getClassLoader();
+            URL resource = classLoader.getResource(filePath);
+            
+            JsonFactory factory = new JsonFactory();
+            parser = factory.createParser(resource);
+            
+            JsonToken nextToken = parser.nextToken();
+            
+            while (!JsonToken.START_ARRAY.equals(nextToken) || !"binary".equals(parser.getCurrentName()))
+                nextToken = parser.nextToken();
+            
+            while (true) {
+                nextToken = parser.nextToken(); // {
+                if(!JsonToken.START_OBJECT.equals(nextToken)) {
+                    return flags;
+                }
+                
+                parser.nextToken(); // "name":"flag"
+                parser.nextToken();
+                String name = parser.getValueAsString();
+                
+                parser.nextToken(); // "offset": 0
+                parser.nextToken();
+                int offset = parser.getValueAsInt();
+                
+                parser.nextToken(); // "size": 0
+                parser.nextToken();
+                int size = parser.getValueAsInt();
+                
+                parser.nextToken(); // "value": 0
+                parser.nextToken();
+                int value = parser.getValueAsInt();
+                flags.add(new Flag(name, offset, size, value, this));
+                
+                parser.nextToken(); // )
+            }
+
+        } catch (Exception ex) {
+            log.error("Error loading flag spec data from " + filePath, ex);
+            return null;
+        }
+    }
+    
+    public FlagRules getFlagRules() {
+        return flagRules;
     }
     
     public String getSeperator() {
