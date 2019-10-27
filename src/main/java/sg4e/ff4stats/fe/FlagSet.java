@@ -20,6 +20,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -168,15 +169,20 @@ public class FlagSet {
     }
     
     public static FlagSet from(String string) {
-        if(BINARY_FLAGSET_PATTERN.matcher(string).find())
-           return fromBinary(string);
-        else {
+        try {
+            return fromString(string);
+        }
+        catch (IllegalArgumentException ex) {
             try {
                 new URL(string).toURI();
                 return fromUrl(string);
             }
-            catch (MalformedURLException | URISyntaxException ex) {
-                return fromString(string);
+            catch (MalformedURLException | URISyntaxException ex2) {
+                if(BINARY_FLAGSET_PATTERN.matcher(string).find())
+                   return fromBinary(string);
+                else {
+                    throw ex;
+                }
             }
         }
     }
@@ -190,29 +196,25 @@ public class FlagSet {
             throw new IllegalArgumentException("Malformed URL: " + ex.getMessage(), ex);
         }
         
-        if(BINARY_FLAGSET_PATTERN.matcher(url).find()) {
-            return fromBinary(url);
-        }
-        else {
-            for(String s : uri.getQuery().split("&")) {
-                try {
-                    String[] ss = s.split("=", 2);
-                    if(ss.length == 1)
-                        continue;
-                    return fromString(ss[1].replace("+", " "));
-                }
-                catch (Exception ex) {
+        for(String s : uri.getQuery().split("&")) {
+            try {
+                String[] ss = s.split("=", 2);
+                if(ss.length == 1)
                     continue;
-                }
+                return fromString(URLDecoder.decode(ss[1], "UTF-8"));
             }
-            return fromString("");
+            catch (Exception ex) {
+                continue;
+            }
         }
-        
+        if(BINARY_FLAGSET_PATTERN.matcher(url).find())
+            return fromBinary(url);
+        else
+            return fromString("");
     }
     
     public static FlagSet fromString(String text) {
-        if(BINARY_FLAGSET_PATTERN.matcher(text).find())
-            throw new IllegalArgumentException("Malformed human readable flag string: " + text);
+        boolean possiblyBinary = BINARY_FLAGSET_PATTERN.matcher(text).find();
         
         FlagVersion version = FlagVersion.getFromVersionString(FlagVersion.latest);        
         
@@ -244,8 +246,11 @@ public class FlagSet {
                 if(flag == null) {
                     version = FlagVersion.getVersionFromFlagString(part);
                     previousFlag = null;
-                    if(version == null)
+                    if(version == null) {
+                        if(possiblyBinary && flagStrings.isEmpty())
+                            throw new IllegalArgumentException("Malformed human readable flag string: " + text);
                         throw new IllegalArgumentException("Error: Unrecognized flag: " + part);
+                    }
                     flag = FlagVersion.getFlagFromFlagString(version, part.split(",")[0], previousFlag);
                     incompatibleFlags.add(flag.getName());
                 }
