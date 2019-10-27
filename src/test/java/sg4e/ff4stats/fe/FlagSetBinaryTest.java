@@ -37,6 +37,7 @@ public class FlagSetBinaryTest {
         return Arrays.asList(new Object[][] {
             { "bAAMDJCQEAMAJBa-OAQ", "Ji K Ps C -rescue T4gr S4 B -whyburn Gdmwl Etf Xsbk -myeyes -mute" }, 
             { "bAAMIJCQEAMAJCl47", "Ji K Ps C -rescue T4gr S4 B -whyburn Gdmwl Etdf Xsbk" },
+            { "bBAAAEAAAAAAAAABJcQAAAABDAQeqCQCF", "Omode:dkmatter/win:game Kmain/trap Pnone Crelaxed/maybe/j:abilities/nodupes Twild Scabins/free Bstandard/alt:gauntlet/whichburn Nchars/key Etoggle Glife -kit:basic -spoon" }
         });
     }
     
