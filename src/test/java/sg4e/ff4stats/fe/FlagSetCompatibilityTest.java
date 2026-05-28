@@ -10,6 +10,8 @@ public class FlagSetCompatibilityTest {
 
     private static final String MODERN_COMPAT_STRING =
             "Kmain/summon/moon/nofree Pkey Cstandard/nofree/j:spells,abilities Twild Sstandard/no:apples Bstandard Etoggle Glife/sylph/backrow/mp -spoon -vanilla:fusoya";
+    private static final String MODERN_COMPAT_STRING_WITH_ONONE =
+            "Onone " + MODERN_COMPAT_STRING;
     private static final String MODERN_COMPAT_BINARY =
             "bBAUAAAAAAAAAAAAAXKgAAAAAAAAAABgAAiCIIIAOAEAQ";
 
@@ -42,6 +44,14 @@ public class FlagSetCompatibilityTest {
         assertEquals(fromString.getFlags(), fromBinary.getFlags());
         assertEquals(fromString.toString(), fromStringBinary.toString());
         assertEquals(fromString.getFlags(), fromStringBinary.getFlags());
+    }
+
+    @Test
+    public void ononePrefixDoesNotCorruptModernParsing() {
+        FlagSet withOnone = FlagSet.fromString(MODERN_COMPAT_STRING_WITH_ONONE);
+        FlagSet withoutOnone = FlagSet.fromString(MODERN_COMPAT_STRING);
+        assertEquals(withoutOnone.getBinary(), withOnone.getBinary());
+        assertEquals(withoutOnone.toString(), withOnone.toString());
     }
 
     @Test

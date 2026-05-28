@@ -239,6 +239,12 @@ public class FlagSet {
         HashSet<String> incompatibleFlags = new HashSet<>();
         
         for(String part : parts) {
+            if ("Onone".equals(part)) {
+                // In modern upstream specs this token is implicit and does not have
+                // a concrete binary entry; ignore it during parse so the remainder
+                // of the flagset can be interpreted consistently.
+                continue;
+            }
             Flag previousFlag = null;
             while(part.length() > 0) {                
                 LOG.debug("-----\nOriginal part: " + part);
