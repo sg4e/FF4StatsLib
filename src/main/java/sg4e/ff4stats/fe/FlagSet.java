@@ -296,12 +296,12 @@ public class FlagSet {
         flagRules.applyRules(flagSet, null);
         for (String part : flagStrings) {
             Flag flag = version.getFlagByName(part);
-            if(maxOffset < (flag.getOffset() + (flag.getSize() - 1)))
-                maxOffset = flag.getOffset() + (flag.getSize() - 1);
             if(flag == null) {
                 incompatibleFlags.add(part);
                 throw new IllegalArgumentException("Error: Incompatible flags specified: " + String.join(", ", incompatibleFlags));
             }
+            if(maxOffset < (flag.getOffset() + (flag.getSize() - 1)))
+                maxOffset = flag.getOffset() + (flag.getSize() - 1);
             flagSet.add(flag);
             flagRules.applyRules(flagSet, flag);
         }

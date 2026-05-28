@@ -3,6 +3,7 @@ package sg4e.ff4stats.fe;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThrows;
 import org.junit.Test;
 
 public class FlagSetCompatibilityTest {
@@ -53,5 +54,10 @@ public class FlagSetCompatibilityTest {
     public void canonicalFormattingPathIsEnabledForModernVersion() {
         FlagSet modern = FlagSet.fromString("Kmain");
         assertEquals(modern.toStringCanonical(), modern.toString());
+    }
+
+    @Test
+    public void incompatibleFlagsFailWithIllegalArgumentExceptionNotNullPointer() {
+        assertThrows(IllegalArgumentException.class, () -> FlagSet.fromString("Qnotaflag"));
     }
 }
