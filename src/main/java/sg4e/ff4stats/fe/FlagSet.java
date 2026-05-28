@@ -51,6 +51,7 @@ public class FlagSet {
     private String version, binary;
     private String seed = "";
     private String readableString = "uninitialized";
+    private boolean canonicalFormatting;
     private static final Logger LOG = LoggerFactory.getLogger(FlagSet.class); 
     
     private FlagSet() {
@@ -115,7 +116,15 @@ public class FlagSet {
     
     @Override
     public String toString() {
+        return canonicalFormatting ? toStringCanonical() : toStringLegacyStyle();
+    }
+
+    public String toStringLegacyStyle() {
         return readableString;
+    }
+
+    public String toStringCanonical() {
+        return sorted();
     }
     
     private String sorted() {
@@ -144,7 +153,12 @@ public class FlagSet {
         
         return s.toString();
     }
-    
+
+    private void configureFormattingMode() {
+        FlagVersion parsedVersion = FlagVersion.getFromVersionString(version);
+        this.canonicalFormatting = parsedVersion == FlagVersion.VERSION_4_0_0 || parsedVersion == FlagVersion.VERSION_4_5_0;
+    }
+
     public Boolean contains(String flagString) {
         for(Flag flag : flags)
             if(flag.getName().equals(flagString))
@@ -225,6 +239,12 @@ public class FlagSet {
         HashSet<String> incompatibleFlags = new HashSet<>();
         
         for(String part : parts) {
+            if ("Onone".equals(part)) {
+                // In modern upstream specs this token is implicit and does not have
+                // a concrete binary entry; ignore it during parse so the remainder
+                // of the flagset can be interpreted consistently.
+                continue;
+            }
             Flag previousFlag = null;
             while(part.length() > 0) {                
                 LOG.debug("-----\nOriginal part: " + part);
@@ -241,7 +261,8 @@ public class FlagSet {
                     LOG.error("Failed to update part due to exception: " + ex.getMessage());
                 }
                 
-                Flag flag = FlagVersion.getFlagFromFlagString(version, part.split(",")[0], previousFlag);
+                String flagToken = part.split(",")[0];
+                Flag flag = FlagVersion.getFlagFromFlagString(version, flagToken, previousFlag);
                 
                 if(flag == null) {
                     version = FlagVersion.getVersionFromFlagString(part);
@@ -251,8 +272,11 @@ public class FlagSet {
                             throw new IllegalArgumentException("Malformed human readable flag string: " + text);
                         throw new IllegalArgumentException("Error: Unrecognized flag: " + part);
                     }
-                    flag = FlagVersion.getFlagFromFlagString(version, part.split(",")[0], previousFlag);
-                    incompatibleFlags.add(flag.getName());
+                    flagToken = part.split(",")[0];
+                    flag = FlagVersion.getFlagFromFlagString(version, flagToken, previousFlag);
+                    if(flag == null) {
+                        throw new IllegalArgumentException("Error: Unrecognized flag: " + part);
+                    }
                 }
                 flagStrings.add(flag.getName());
                 if(flag.getName().length() == 1)
@@ -278,16 +302,17 @@ public class FlagSet {
         flagRules.applyRules(flagSet, null);
         for (String part : flagStrings) {
             Flag flag = version.getFlagByName(part);
-            if(maxOffset < (flag.getOffset() + (flag.getSize() - 1)))
-                maxOffset = flag.getOffset() + (flag.getSize() - 1);
             if(flag == null) {
                 incompatibleFlags.add(part);
                 throw new IllegalArgumentException("Error: Incompatible flags specified: " + String.join(", ", incompatibleFlags));
             }
+            if(maxOffset < (flag.getOffset() + (flag.getSize() - 1)))
+                maxOffset = flag.getOffset() + (flag.getSize() - 1);
             flagSet.add(flag);
             flagRules.applyRules(flagSet, flag);
         }
         flagSet.setVersion(version.getVersion());
+        flagSet.configureFormattingMode();
         flagSet.setReadableString(flagSet.sorted());
         
         maxOffset >>= 3;
@@ -352,6 +377,7 @@ public class FlagSet {
             if(decodedValue == f.getValue())
                 flagSet.add(f);
         });
+        flagSet.configureFormattingMode();
         flagSet.setReadableString(flagSet.sorted());
         
         return flagSet;
