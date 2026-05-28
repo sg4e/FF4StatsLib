@@ -44,7 +44,8 @@ public enum FlagVersion {
     VERSION_3_4("3-4", "bAAME",""),
     VERSION_3_5("3-5", "bAAMG",""),
     VERSION_3_7("3-7", "bAAMI",""),
-    VERSION_4_0_0("4-0-0", "bBAAA","/");
+    VERSION_4_0_0("4-0-0", "bBAAA","/"),
+    VERSION_4_5_0("4-5-0", "bBAUA","/");
     
     private final Logger log = LoggerFactory.getLogger(FlagVersion.class);
     private static final HashSet<FlagVersion> triedVersions = new HashSet<>();
@@ -58,7 +59,7 @@ public enum FlagVersion {
     
     private static final Logger LOG = LoggerFactory.getLogger(FlagVersion.class);
     
-    public static final String latest = "4.0.0";
+    public static final String latest = "4.5.0";
     public static final String earliest = "0.3.0";
     
     private FlagVersion(String filename, String binaryVersion, String seperator) {
@@ -215,6 +216,8 @@ public enum FlagVersion {
     }
     
     public static FlagVersion getVersionFromFlagString(String flag) {
+        if(getFlagFromFlagString(VERSION_4_5_0, flag, null) != null && !triedVersions.contains(VERSION_4_5_0))
+            return VERSION_4_5_0;
         if(getFlagFromFlagString(VERSION_4_0_0, flag, null) != null && !triedVersions.contains(VERSION_4_0_0))
             return VERSION_4_0_0;
         if(getFlagFromFlagString(VERSION_3_7, flag, null) != null && !triedVersions.contains(VERSION_3_7))
@@ -247,6 +250,8 @@ public enum FlagVersion {
         switch(version) {
             default:
                 LOG.warn("Unrecognized flag version {}; using latest", version);
+            case "4.5.0":
+                return VERSION_4_5_0;
             case "4.0.0":
                 return VERSION_4_0_0;
             case "0.3.8":
